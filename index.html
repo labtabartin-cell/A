@@ -1,0 +1,1501 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>تور سه‌بعدی مدرسه</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@400;500;700&display=swap">
+<style>
+/* Layout: wizard of two calm paper screens (map, deck) that hands over to a full-bleed 3D view with a small HUD. */
+:root{
+  --bg:#eef1f5; --surface:#ffffff; --ink:#14202e; --muted:#586677; --line:#d3dae4;
+  --accent:#1c55b8; --accent-ink:#ffffff; --pencil:#e3a008; --board:#1f4d3c; --ok:#1f7a4d; --warn:#b4540a;
+  --shadow:0 1px 2px rgba(20,32,46,.08),0 8px 24px rgba(20,32,46,.08);
+  --f-display:'Lalezar','Vazirmatn',system-ui,sans-serif;
+  --f-body:'Vazirmatn','Segoe UI',Tahoma,system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e151e; --surface:#16202c; --ink:#e8eef6; --muted:#94a3b5; --line:#2a3748;
+  --accent:#6ea2ff; --accent-ink:#0b1626; --pencil:#f2b53a; --board:#2b6a52; --ok:#5fcf97; --warn:#f0a35e;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e151e; --surface:#16202c; --ink:#e8eef6; --muted:#94a3b5; --line:#2a3748;
+  --accent:#6ea2ff; --accent-ink:#0b1626; --pencil:#f2b53a; --board:#2b6a52; --ok:#5fcf97; --warn:#f0a35e;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.7 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+button,select,input{font:inherit;color:inherit}
+h1,h2,h3{margin:0;font-family:var(--f-display);font-weight:400;text-wrap:balance;line-height:1.3}
+:focus-visible{outline:3px solid var(--pencil);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+#app{max-width:1080px;margin:0 auto;padding-block:20px 40px;display:flex;flex-direction:column;gap:22px;min-height:100%}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font:400 22px/1 var(--f-display)}
+.brand i{width:34px;height:34px;border-radius:9px;background:var(--board);display:grid;place-items:center;box-shadow:inset 0 -4px 0 rgba(0,0,0,.25)}
+.brand i::after{content:"";width:16px;height:3px;background:#f4f1e6;border-radius:2px;box-shadow:0 6px 0 -0px #f4f1e6 inset}
+.steps{display:flex;gap:6px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+.steps li{display:flex;align-items:center;gap:8px;padding:5px 12px;border-radius:99px;color:var(--muted);border:1px solid var(--line);font-size:13px;background:var(--surface)}
+.steps li b{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;background:var(--line);color:var(--ink)}
+.steps li.on{color:var(--ink);border-color:var(--accent)}
+.steps li.on b{background:var(--accent);color:var(--accent-ink)}
+.steps li.done b{background:var(--ok);color:#fff}
+
+.screen{display:flex;flex-direction:column;gap:20px}
+.lead{max-width:60ch}
+.lead h1{font-size:clamp(30px,5vw,46px)}
+.lead p{margin:8px 0 0;color:var(--muted)}
+
+.maps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-width:0}
+.map-card{display:flex;flex-direction:column;overflow:hidden;text-align:right;cursor:pointer;padding:0;border:1px solid var(--line);background:var(--surface);border-radius:14px;box-shadow:var(--shadow);transition:transform .15s,border-color .15s}
+.map-card:hover{transform:translateY(-2px);border-color:var(--accent)}
+.map-card canvas{width:100%;aspect-ratio:16/9;display:block;background:#dfe6ee}
+.map-card .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px}
+.map-card h3{font-size:26px}
+.map-card p{margin:0;color:var(--muted);font-size:14px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.tag{font-size:12px;padding:1px 9px;border-radius:99px;background:var(--bg);border:1px solid var(--line);color:var(--muted)}
+.soon{display:grid;place-items:center;text-align:center;padding:24px;border:2px dashed var(--line);border-radius:14px;color:var(--muted);min-height:200px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:500;min-height:44px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.btn.primary:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent}
+
+.deck-grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:820px){.deck-grid{grid-template-columns:minmax(0,1fr)}}
+.panel{padding:18px;display:flex;flex-direction:column;gap:14px}
+.panel h2{font-size:22px}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:22px 14px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center;cursor:pointer;background:var(--bg);transition:border-color .15s,background .15s}
+.drop.over,.drop:hover{border-color:var(--accent)}
+.drop strong{font-weight:700}
+.drop small{color:var(--muted)}
+.file-info{font-size:14px;color:var(--muted);min-height:1.7em}
+.file-info.ok{color:var(--ok)}.file-info.err{color:var(--warn)}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:var(--bg);padding:9px 8px;cursor:pointer;font-weight:500;min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.hint{font-size:13px;color:var(--muted);margin:0}
+
+.rooms-sum{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.rooms-sum div{display:flex;justify-content:space-between;gap:8px;padding:6px 10px;background:var(--bg);border-radius:8px;font-size:13px}
+.rooms-sum b{font-weight:700}
+
+.slide-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:12px;max-height:56vh;overflow:auto;padding:2px}
+.slide-item{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-width:0}
+.slide-item canvas{width:100%;aspect-ratio:16/9;border-radius:6px;background:#fff;display:block;border:1px solid var(--line)}
+.slide-item .row{display:flex;align-items:center;gap:8px;justify-content:space-between;font-size:13px}
+.slide-item select{flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--surface);min-height:36px}
+.slide-item select:disabled{opacity:.7}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.actions{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}
+
+/* 3D view */
+#game{position:fixed;inset:0;background:#000;z-index:5;touch-action:none;user-select:none;-webkit-user-select:none}
+#gl{width:100%;height:100%;display:block}
+.hud{position:absolute;pointer-events:none;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+#cross{left:50%;top:50%;width:8px;height:8px;margin:-4px;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 0 0 2px rgba(0,0,0,.35)}
+#cross.act{background:var(--pencil);transform:scale(1.8)}
+#prompt{left:50%;bottom:calc(14% + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:rgba(10,16,24,.72);padding:6px 16px;border-radius:99px;font-size:14px;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+#where{right:max(16px,env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));background:rgba(10,16,24,.7);padding:6px 14px;border-radius:10px;font:400 20px/1.4 var(--f-display)}
+.hud-btns{position:absolute;left:max(14px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));display:flex;gap:8px;flex-wrap:wrap;max-width:60vw}
+.hud-btns button{background:rgba(10,16,24,.72);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:6px 14px;cursor:pointer;min-height:40px;font-size:14px}
+.hud-btns button:hover{border-color:var(--pencil)}
+#mini{position:absolute;left:max(14px,env(safe-area-inset-left,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));width:210px;height:76px;border-radius:10px;background:rgba(10,16,24,.7);border:1px solid rgba(255,255,255,.2)}
+#menu{position:absolute;inset:0;display:grid;place-items:center;background:rgba(8,14,22,.78);padding:16px}
+#menu .box{width:min(100%,520px);max-height:92%;overflow:auto;background:var(--surface);color:var(--ink);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow)}
+#menu h2{font-size:28px}
+#menu ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#menu li button{width:100%;text-align:right;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer;min-height:44px}
+#menu li button:hover{border-color:var(--accent)}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px;color:var(--muted);margin:0}
+.keys b{color:var(--ink);font-weight:500;direction:ltr;text-align:left}
+#joy{position:absolute;left:max(24px,env(safe-area-inset-left,0px));bottom:calc(110px + env(safe-area-inset-bottom,0px));width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.35);display:none}
+#joy i{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px;border-radius:50%;background:rgba(255,255,255,.55)}
+.touch #joy{display:block}
+#zoom{position:absolute;inset:0;background:rgba(4,8,12,.92);display:grid;grid-template-rows:1fr auto;place-items:center;padding:16px;gap:12px}
+#zoom canvas{max-width:100%;max-height:100%;border-radius:6px;box-shadow:0 10px 40px rgba(0,0,0,.6);background:#fff}
+#zoom .bar{display:flex;gap:10px;align-items:center;color:#fff}
+#zoom .bar button{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 18px;cursor:pointer;min-height:44px}
+#loading{position:fixed;inset:0;z-index:20;background:var(--bg);display:grid;place-items:center;text-align:center}
+#loading .bar{width:min(280px,70vw);height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin:14px auto 0}
+#loading .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<div id="app" dir="rtl" lang="fa">
+  <header class="top">
+    <div class="brand"><i aria-hidden="true"></i><span>تور سه‌بعدی مدرسه</span></div>
+    <ol class="steps" id="steps">
+      <li class="on" data-s="1"><b>۱</b>انتخاب نقشه</li>
+      <li data-s="2"><b>۲</b>ارائه و تنظیمات</li>
+      <li data-s="3"><b>۳</b>ورود به مدرسه</li>
+    </ol>
+  </header>
+
+  <main>
+    <section id="s-map" class="screen">
+      <div class="lead">
+        <h1>کدام محیط را برای ارائه می‌خواهید؟</h1>
+        <p>یک نقشه انتخاب کنید. در مرحلهٔ بعد فایل پاورپوینت را وارد می‌کنید و اسلایدها روی تخته‌های کلاس‌ها قرار می‌گیرند.</p>
+      </div>
+      <div class="maps">
+        <button class="map-card" id="pick-school" type="button">
+          <canvas id="plan" width="640" height="360" aria-label="نمای بالای مدرسه"></canvas>
+          <div class="body">
+            <h3>مدرسه</h3>
+            <p>ساختمان یک‌طبقه با حیاط، ورودی، راهرو، شش کلاس درس و بخش‌های اداری.</p>
+            <div class="tags"><span class="tag">۶ کلاس</span><span class="tag">دفتر مدرسه</span><span class="tag">اتاق مدیر</span><span class="tag">اتاق معلمان</span><span class="tag">کتابخانه</span></div>
+          </div>
+        </button>
+        <button class="map-card" id="pick-amini" type="button">
+          <canvas id="plan2" width="640" height="360" aria-label="نمای بالای مدرسه علامه امینی"></canvas>
+          <div class="body">
+            <h3>مدرسه علامه امینی</h3>
+            <p>ساختمان دوطبقه با حیاط، ورودی، راه‌پلهٔ پیچ‌دار، ۱۱ کلاس درس، آزمایشگاه، اتاق کامپیوتر و دفاتر اداری.</p>
+            <div class="tags"><span class="tag">۱۱ کلاس</span><span class="tag">۲ طبقه</span><span class="tag">آزمایشگاه</span><span class="tag">اتاق کامپیوتر</span><span class="tag">بالکن</span></div>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <section id="s-deck" class="screen" hidden>
+      <div class="lead">
+        <h1>ارائه را وارد کنید</h1>
+        <p>فایل پاورپوینت را بارگذاری کنید. در حالت خودکار، اسلایدها به‌ترتیب بین کلاس‌ها پخش می‌شوند. اگر خواستید، حالت دستی را بزنید و برای هر اسلاید کلاس را خودتان تعیین کنید.</p>
+      </div>
+      <div class="deck-grid">
+        <div class="card panel">
+          <h2>فایل ارائه</h2>
+          <label class="drop" id="drop" for="file">
+            <strong>فایل .pptx را اینجا رها کنید</strong>
+            <small>یا برای انتخاب فایل کلیک کنید</small>
+          </label>
+          <input id="file" type="file" accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation" hidden>
+          <button class="btn ghost" id="demo" type="button">استفاده از اسلایدهای نمونه</button>
+          <div class="file-info" id="info" role="status">هنوز فایلی انتخاب نشده است.</div>
+          <h2>نحوهٔ چیدن</h2>
+          <div class="seg" role="group" aria-label="نحوهٔ چیدن">
+            <button type="button" id="m-auto" aria-pressed="true">خودکار</button>
+            <button type="button" id="m-manual" aria-pressed="false">دستی</button>
+          </div>
+          <p class="hint" id="mode-hint">اسلایدها به‌صورت پشت‌سرهم و مساوی بین کلاس‌ها تقسیم می‌شوند.</p>
+          <div class="rooms-sum" id="sum"></div>
+        </div>
+        <div class="card panel">
+          <h2>اسلایدها <span class="hint num" id="count"></span></h2>
+          <div class="slide-list" id="slides"><div class="empty">بعد از وارد کردن فایل، اسلایدها اینجا دیده می‌شوند.</div></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="back" type="button">بازگشت</button>
+        <button class="btn primary" id="go" type="button" disabled>تأیید و ورود به مدرسه</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="loading" hidden dir="rtl" lang="fa"><div><h2>در حال ساخت مدرسه…</h2><div class="bar"><i id="lbar"></i></div><p class="hint" id="ltxt">آماده‌سازی</p></div></div>
+
+<div id="game" hidden dir="rtl" lang="fa">
+  <canvas id="gl"></canvas>
+  <div class="hud" id="cross"></div>
+  <div class="hud" id="where"></div>
+  <div class="hud" id="prompt" hidden></div>
+  <div class="hud-btns">
+    <button type="button" id="b-menu">فهرست و راهنما</button>
+    <button type="button" id="b-exit">خروج به تنظیمات</button>
+  </div>
+  <canvas id="mini" width="420" height="152"></canvas>
+  <div id="joy"><i></i></div>
+  <div id="menu" hidden>
+    <div class="box">
+      <h2 id="menu-title">مدرسه</h2>
+      <p class="hint" id="menu-sub">برای شروع روی «ادامه» بزنید.</p>
+      <button class="btn primary" id="b-resume" type="button">ادامه</button>
+      <div><strong>رفتن سریع به</strong></div>
+      <ul id="tele"></ul>
+      <dl class="keys">
+        <dt><b>W A S D</b></dt><dd>حرکت (Shift برای دویدن)</dd>
+        <dt><b>Mouse</b></dt><dd>نگاه کردن (Esc برای توقف)</dd>
+        <dt><b>Click / E</b></dt><dd>نشستن روی صندلی، دکمه‌های تخته</dd>
+        <dt><b>Q / R</b></dt><dd>اسلاید قبلی / بعدی تخته‌ی همین کلاس</dd>
+        <dt><b>Space</b></dt><dd>بلند شدن از صندلی</dd>
+      </dl>
+    </div>
+  </div>
+  <div id="zoom" hidden>
+    <canvas id="zc"></canvas>
+    <div class="bar"><button type="button" id="z-prev">قبلی</button><span class="num" id="z-n"></span><button type="button" id="z-next">بعدی</button><button type="button" id="z-close">بستن</button></div>
+  </div>
+</div>
+<script>
+/* ===== PPTX -> canvases ===== */
+const PPTX = (() => {
+  const EMU_PT = 12700;
+  const HAS_RTL = /[֐-ࣿיִ-﷿ﹰ-﻿]/;
+  let COLOR = null; const color = p => COLOR(p);
+  const dp = new DOMParser();
+  const parse = s => dp.parseFromString(s, 'application/xml');
+  const kids = (el, name) => el ? [...el.children].filter(c => c.localName === name) : [];
+  const kid = (el, name) => kids(el, name)[0] || null;
+  const path = (el, ...names) => { let c = el; for (const n of names) { c = kid(c, n); if (!c) return null; } return c; };
+  const attr = (el, n, d) => (el && el.getAttribute(n) != null) ? el.getAttribute(n) : d;
+
+  function hex2rgb(h) { return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+  function rgb2hsl([r, g, b]) {
+    r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2;
+    if (mx !== mn) { const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn);
+      h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h /= 6; }
+    return [h, s, l];
+  }
+  function hsl2rgb([h, s, l]) {
+    const f = (p, q, t) => { if (t < 0) t += 1; if (t > 1) t -= 1; return t < 1/6 ? p + (q - p) * 6 * t : t < .5 ? q : t < 2/3 ? p + (q - p) * (2/3 - t) * 6 : p; };
+    if (s === 0) { const v = Math.round(l * 255); return [v, v, v]; }
+    const q = l < .5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+    return [f(p, q, h + 1/3), f(p, q, h), f(p, q, h - 1/3)].map(v => Math.round(v * 255));
+  }
+
+  async function load(file, onProgress) {
+    const zip = await JSZip.loadAsync(file);
+    const text = async p => { const f = zip.file(p); return f ? await f.async('string') : null; };
+    const presXml = await text('ppt/presentation.xml');
+    if (!presXml) throw new Error('این فایل یک پاورپوینت معتبر (pptx) نیست.');
+    const pres = parse(presXml);
+    const sz = pres.getElementsByTagName('p:sldSz')[0];
+    const SW = +attr(sz, 'cx', 12192000), SH = +attr(sz, 'cy', 6858000);
+    const relsOf = async p => {
+      const dir = p.replace(/[^/]+$/, ''), name = p.split('/').pop();
+      const x = await text(dir + '_rels/' + name + '.rels'); const m = {};
+      if (x) for (const r of parse(x).getElementsByTagName('Relationship')) {
+        let t = r.getAttribute('Target'); if (r.getAttribute('TargetMode') === 'External') continue;
+        t = t.startsWith('/') ? t.slice(1) : normalize(dir + t); m[r.getAttribute('Id')] = { t, type: r.getAttribute('Type') };
+      } return m;
+    };
+    const normalize = p => { const o = []; for (const s of p.split('/')) { if (s === '..') o.pop(); else if (s !== '.') o.push(s); } return o.join('/'); };
+
+    // theme
+    const theme = {}; const themeXml = await text('ppt/theme/theme1.xml');
+    if (themeXml) { const cs = parse(themeXml).getElementsByTagName('a:clrScheme')[0];
+      if (cs) for (const c of cs.children) { const k = c.firstElementChild; theme[c.localName] = k ? (k.getAttribute('val') !== 'window' && k.getAttribute('val') !== 'windowText' && k.localName === 'srgbClr' ? k.getAttribute('val') : (k.getAttribute('lastClr') || 'FFFFFF')) : 'FFFFFF'; } }
+    const clrMap = { tx1: 'dk1', bg1: 'lt1', tx2: 'dk2', bg2: 'lt2' };
+    const themeFonts = { major: 'Vazirmatn, Tahoma, sans-serif', minor: 'Vazirmatn, Tahoma, sans-serif' };
+
+    function color(parent) {
+      if (!parent) return null;
+      const c = [...parent.children].find(k => ['srgbClr', 'schemeClr', 'sysClr', 'prstClr', 'scrgbClr'].includes(k.localName));
+      if (!c) return null;
+      let hex = null, alpha = 1;
+      if (c.localName === 'srgbClr') hex = c.getAttribute('val');
+      else if (c.localName === 'sysClr') hex = c.getAttribute('lastClr') || '000000';
+      else if (c.localName === 'schemeClr') { const v = c.getAttribute('val'); hex = theme[clrMap[v] || v] || (v === 'phClr' ? '808080' : 'FFFFFF'); }
+      else if (c.localName === 'prstClr') hex = ({ black: '000000', white: 'FFFFFF', red: 'FF0000', blue: '0000FF', green: '008000', yellow: 'FFFF00', gray: '808080' })[c.getAttribute('val')] || '000000';
+      else hex = '808080';
+      let rgb = hex2rgb(hex.padEnd(6, '0'));
+      for (const m of c.children) {
+        const v = +m.getAttribute('val') / 100000;
+        if (m.localName === 'alpha') alpha = v;
+        else if (['lumMod', 'lumOff', 'satMod'].includes(m.localName)) {
+          const hsl = rgb2hsl(rgb);
+          if (m.localName === 'lumMod') hsl[2] *= v; else if (m.localName === 'lumOff') hsl[2] += v; else hsl[1] *= v;
+          hsl[2] = Math.min(1, Math.max(0, hsl[2])); hsl[1] = Math.min(1, hsl[1]); rgb = hsl2rgb(hsl);
+        } else if (m.localName === 'tint') rgb = rgb.map(x => Math.round(x + (255 - x) * (1 - v)));
+        else if (m.localName === 'shade') rgb = rgb.map(x => Math.round(x * v));
+      }
+      return alpha < 1 ? `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})` : `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+    }
+
+    COLOR = color;
+    // media cache
+    const imgCache = {};
+    async function image(p) {
+      if (p in imgCache) return imgCache[p];
+      const f = zip.file(p); if (!f || /\.(emf|wmf|tif|tiff)$/i.test(p)) return (imgCache[p] = null);
+      const blob = new Blob([await f.async('uint8array')], { type: /\.png$/i.test(p) ? 'image/png' : /\.gif$/i.test(p) ? 'image/gif' : /\.svg$/i.test(p) ? 'image/svg+xml' : 'image/jpeg' });
+      const url = URL.createObjectURL(blob);
+      return (imgCache[p] = await new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = url; }));
+    }
+
+    const master = {}; // cache layout/master parsed docs
+    async function doc(p) { if (!(p in master)) { const x = await text(p); master[p] = x ? parse(x) : null; } return master[p]; }
+
+    const slideIds = [...pres.getElementsByTagName('p:sldId')].map(e => e.getAttribute('r:id'));
+    const presRels = await relsOf('ppt/presentation.xml');
+    const out = [];
+    for (let i = 0; i < slideIds.length; i++) {
+      const sp = presRels[slideIds[i]]; if (!sp) continue;
+      const sdoc = await doc(sp.t); if (!sdoc) continue;
+      const srels = await relsOf(sp.t);
+      const layoutRel = Object.values(srels).find(r => /slideLayout$/.test(r.type));
+      const layoutDoc = layoutRel ? await doc(layoutRel.t) : null;
+      let masterDoc = null;
+      if (layoutRel) { const lr = await relsOf(layoutRel.t); const mr = Object.values(lr).find(r => /slideMaster$/.test(r.type)); if (mr) masterDoc = await doc(mr.t); }
+      const canvas = await renderSlide({ sdoc, srels, layoutDoc, masterDoc, SW, SH, color, image, relsOf, pathOf: sp.t });
+      out.push({ canvas, title: slideTitle(sdoc) || ('اسلاید ' + (i + 1)) });
+      onProgress && onProgress((i + 1) / slideIds.length);
+      await new Promise(r => setTimeout(r, 0));
+    }
+    if (!out.length) throw new Error('هیچ اسلایدی در فایل پیدا نشد.');
+    return out;
+  }
+
+  function slideTitle(sdoc) {
+    for (const sp of sdoc.getElementsByTagName('p:sp')) {
+      const ph = sp.getElementsByTagName('p:ph')[0];
+      if (ph && /title/i.test(ph.getAttribute('type') || '')) { const t = [...sp.getElementsByTagName('a:t')].map(x => x.textContent).join(' ').trim(); if (t) return t.slice(0, 60); }
+    }
+    return '';
+  }
+
+  function findPh(root, ph) {
+    if (!root || !ph) return null;
+    const type = ph.getAttribute('type'), idx = ph.getAttribute('idx');
+    for (const sp of root.getElementsByTagName('p:sp')) {
+      const p = sp.getElementsByTagName('p:ph')[0]; if (!p) continue;
+      if ((idx && p.getAttribute('idx') === idx) || (!idx && type && p.getAttribute('type') === type) || (type === 'ctrTitle' && p.getAttribute('type') === 'title')) return sp;
+    }
+    return null;
+  }
+  function xfrmOf(sp) { const x = sp && (path(sp, 'spPr', 'xfrm') || path(sp, 'grpSpPr', 'xfrm') || kid(sp, 'xfrm')); if (!x) return null; const o = kid(x, 'off'), e = kid(x, 'ext'); if (!o || !e) return null;
+    return { x: +o.getAttribute('x'), y: +o.getAttribute('y'), w: +e.getAttribute('cx'), h: +e.getAttribute('cy'), rot: +attr(x, 'rot', 0) / 60000, flipH: attr(x, 'flipH') === '1', flipV: attr(x, 'flipV') === '1' }; }
+
+  async function renderSlide(C) {
+    const { sdoc, srels, layoutDoc, masterDoc, SW, SH, color, image } = C;
+    const W = 1600, H = Math.round(W * SH / SW), k = W / SW;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+
+    // background: slide -> layout -> master
+    for (const d of [sdoc, layoutDoc, masterDoc]) {
+      const bg = d && d.getElementsByTagName('p:bg')[0]; if (!bg) continue;
+      const bgPr = kid(bg, 'bgPr'); const ref = kid(bg, 'bgRef'); let fill = null;
+      if (bgPr) { const sf = kid(bgPr, 'solidFill'); if (sf) fill = color(sf); const gf = kid(bgPr, 'gradFill'); if (!fill && gf) fill = gradient(g, gf, 0, 0, W, H, color);
+        const bf = kid(bgPr, 'blipFill'); if (!fill && bf) { const rid = kid(bf, 'blip') && kid(bf, 'blip').getAttribute('r:embed'); const rels = d === sdoc ? srels : null; const t = rels && rels[rid]; const im = t && await image(t.t); if (im) { g.drawImage(im, 0, 0, W, H); fill = 'img'; } } }
+      else if (ref) fill = color(ref);
+      if (fill && fill !== 'img') { g.fillStyle = fill; g.fillRect(0, 0, W, H); }
+      if (fill) break;
+    }
+
+    const tree = path(sdoc.documentElement, 'cSld', 'spTree'); if (!tree) return cv;
+    const ctx = { g, k, W, H, color, image, srels, layoutDoc, masterDoc };
+    await drawTree(tree, ctx, { sx: 1, sy: 1, ox: 0, oy: 0 });
+    return cv;
+  }
+
+  function gradient(g, gf, x, y, w, h, color) {
+    const stops = kids(path(gf, 'gsLst') || gf, 'gs'); if (!stops.length) return null;
+    const lin = kid(gf, 'lin'); const ang = ((lin ? +lin.getAttribute('ang') : 5400000) / 60000) * Math.PI / 180;
+    const cx = x + w / 2, cy = y + h / 2, dx = Math.cos(ang) * w / 2, dy = Math.sin(ang) * h / 2;
+    const gr = g.createLinearGradient(cx - dx, cy - dy, cx + dx, cy + dy);
+    for (const s of stops) gr.addColorStop(Math.min(1, Math.max(0, +s.getAttribute('pos') / 100000)), color(s) || '#888');
+    return gr;
+  }
+
+  async function drawTree(tree, ctx, T) {
+    for (const el of tree.children) {
+      const n = el.localName;
+      if (n === 'sp' || n === 'cxnSp') await drawShape(el, ctx, T);
+      else if (n === 'pic') await drawPic(el, ctx, T);
+      else if (n === 'grpSp') {
+        const gx = path(el, 'grpSpPr', 'xfrm'); let T2 = T;
+        if (gx) { const o = kid(gx, 'off'), e = kid(gx, 'ext'), co = kid(gx, 'chOff'), ce = kid(gx, 'chExt');
+          if (o && e && co && ce && +ce.getAttribute('cx') && +ce.getAttribute('cy')) {
+            const sx = +e.getAttribute('cx') / +ce.getAttribute('cx'), sy = +e.getAttribute('cy') / +ce.getAttribute('cy');
+            T2 = { sx: T.sx * sx, sy: T.sy * sy, ox: T.ox + T.sx * (+o.getAttribute('x') - sx * +co.getAttribute('x')), oy: T.oy + T.sy * (+o.getAttribute('y') - sy * +co.getAttribute('y')) }; } }
+        await drawTree(el, ctx, T2);
+      } else if (n === 'graphicFrame') await drawFrame(el, ctx, T);
+    }
+  }
+
+  function box(x, ctx, T) { if (!x) return null; const k = ctx.k;
+    return { x: (T.ox + T.sx * x.x) * k, y: (T.oy + T.sy * x.y) * k, w: T.sx * x.w * k, h: T.sy * x.h * k, rot: x.rot, flipH: x.flipH, flipV: x.flipV }; }
+
+  function withRot(g, b, fn) { g.save(); const cx = b.x + b.w / 2, cy = b.y + b.h / 2; g.translate(cx, cy); if (b.rot) g.rotate(b.rot * Math.PI / 180); g.scale(b.flipH ? -1 : 1, b.flipV ? -1 : 1); g.translate(-cx, -cy); fn(); g.restore(); }
+
+  function geomPath(g, prst, b) {
+    const { x, y, w, h } = b; g.beginPath();
+    if (prst === 'ellipse') g.ellipse(x + w / 2, y + h / 2, Math.abs(w / 2), Math.abs(h / 2), 0, 0, Math.PI * 2);
+    else if (prst === 'roundRect' || prst === 'round2SameRect') { const r = Math.min(w, h) * .16; g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+    else if (prst === 'triangle') { g.moveTo(x + w / 2, y); g.lineTo(x + w, y + h); g.lineTo(x, y + h); g.closePath(); }
+    else if (prst === 'diamond') { g.moveTo(x + w / 2, y); g.lineTo(x + w, y + h / 2); g.lineTo(x + w / 2, y + h); g.lineTo(x, y + h / 2); g.closePath(); }
+    else if (prst === 'rightArrow') { const t = h * .25; g.moveTo(x, y + t); g.lineTo(x + w * .6, y + t); g.lineTo(x + w * .6, y); g.lineTo(x + w, y + h / 2); g.lineTo(x + w * .6, y + h); g.lineTo(x + w * .6, y + h - t); g.lineTo(x, y + h - t); g.closePath(); }
+    else if (prst === 'line' || prst === 'straightConnector1') { g.moveTo(x, y); g.lineTo(x + w, y + h); }
+    else g.rect(x, y, w, h);
+  }
+
+  function styleRef(el, which) { const st = kid(el, 'style'); const r = st && kid(st, which); return r ? color(r) : null; }
+
+  async function drawShape(el, ctx, T) {
+    const { g, k, color } = ctx; const ph = el.getElementsByTagName('p:ph')[0];
+    let x = xfrmOf(el); let layoutSp = null, masterSp = null;
+    if (ph) { layoutSp = findPh(ctx.layoutDoc, ph); masterSp = findPh(ctx.masterDoc, ph); if (!x) x = xfrmOf(layoutSp) || xfrmOf(masterSp); }
+    const b = box(x, ctx, T); if (!b) return;
+    const spPr = kid(el, 'spPr'); const prst = attr(path(spPr, 'prstGeom'), 'prst', 'rect');
+    const colorFn = c => (el.localName === 'sp' || true) ? color(c) : null;
+    // fill
+    let fill = null;
+    if (spPr) { const sf = kid(spPr, 'solidFill'); if (sf) fill = color(sf); else if (kid(spPr, 'gradFill')) fill = gradient(g, kid(spPr, 'gradFill'), b.x, b.y, b.w, b.h, color); else if (!kid(spPr, 'noFill') && !ph) { const st = kid(el, 'style'); const fr = st && kid(st, 'fillRef'); if (fr && fr.getAttribute('idx') !== '0') fill = color(fr); } }
+    // outline
+    let stroke = null, lw = 0; const ln = spPr && kid(spPr, 'ln');
+    if (ln && !kid(ln, 'noFill')) { const sf = kid(ln, 'solidFill'); stroke = sf ? color(sf) : styleRef(el, 'lnRef'); lw = (+attr(ln, 'w', 12700)) * k; }
+    else if (!ln && !ph) { const st = kid(el, 'style'); const lr = st && kid(st, 'lnRef'); if (lr && lr.getAttribute('idx') !== '0' && el.localName === 'cxnSp') { stroke = color(lr); lw = 12700 * k; } }
+    withRot(g, b, () => {
+      if (fill || (stroke && lw)) {
+        geomPath(g, prst, b);
+        if (fill && prst !== 'line' && prst !== 'straightConnector1') { g.fillStyle = fill; g.fill(); }
+        if (stroke && lw) { g.strokeStyle = stroke; g.lineWidth = Math.max(1, lw); g.stroke(); }
+      }
+    });
+    const tb = kid(el, 'txBody'); if (tb) drawText(tb, b, ctx, { ph, layoutSp, masterSp, el });
+  }
+
+  async function drawPic(el, ctx, T) {
+    const x = xfrmOf(el); const b = box(x, ctx, T); if (!b) return;
+    const blip = el.getElementsByTagName('a:blip')[0]; if (!blip) return;
+    const rel = ctx.srels[blip.getAttribute('r:embed')]; if (!rel) return;
+    const im = await ctx.image(rel.t); if (!im) return;
+    const src = el.getElementsByTagName('a:srcRect')[0];
+    const l = src ? +attr(src, 'l', 0) / 1e5 : 0, t = src ? +attr(src, 't', 0) / 1e5 : 0, r = src ? +attr(src, 'r', 0) / 1e5 : 0, bt = src ? +attr(src, 'b', 0) / 1e5 : 0;
+    withRot(ctx.g, b, () => ctx.g.drawImage(im, l * im.width, t * im.height, im.width * (1 - l - r), im.height * (1 - t - bt), b.x, b.y, b.w, b.h));
+  }
+
+  async function drawFrame(el, ctx, T) {
+    const x = el.getElementsByTagName('p:xfrm')[0]; if (!x) return;
+    const o = kid(x, 'off'), e = kid(x, 'ext'); const b = box({ x: +o.getAttribute('x'), y: +o.getAttribute('y'), w: +e.getAttribute('cx'), h: +e.getAttribute('cy') }, ctx, T);
+    const tbl = el.getElementsByTagName('a:tbl')[0]; const g = ctx.g;
+    if (!tbl) { g.save(); g.fillStyle = 'rgba(120,130,150,.15)'; g.fillRect(b.x, b.y, b.w, b.h); g.strokeStyle = '#99a'; g.strokeRect(b.x, b.y, b.w, b.h); g.fillStyle = '#556'; g.font = '30px Vazirmatn, Tahoma'; g.textAlign = 'center'; g.fillText('نمودار / شیء جاسازی‌شده', b.x + b.w / 2, b.y + b.h / 2); g.restore(); return; }
+    const cols = kids(kid(tbl, 'tblGrid'), 'gridCol').map(c => +c.getAttribute('w')); const rows = kids(tbl, 'tr');
+    let yy = b.y; const tw = cols.reduce((a, c) => a + c, 0) || 1;
+    for (const r of rows) { const rh = +attr(r, 'h', 370840) * ctx.k * T.sy; let xx = b.x; const cells = kids(r, 'tc');
+      cells.forEach((c, i) => { const cw = (cols[i] || tw / cells.length) * ctx.k * T.sx; const cb = { x: xx, y: yy, w: cw, h: rh, rot: 0 };
+        const tcPr = kid(c, 'tcPr'); const sf = tcPr && kid(tcPr, 'solidFill');
+        g.fillStyle = sf ? ctx.color(sf) : (rows.indexOf(r) === 0 ? 'rgba(28,85,184,.85)' : (rows.indexOf(r) % 2 ? 'rgba(28,85,184,.08)' : 'rgba(255,255,255,0)')); g.fillRect(cb.x, cb.y, cb.w, cb.h);
+        g.strokeStyle = 'rgba(100,110,130,.55)'; g.lineWidth = 1.5; g.strokeRect(cb.x, cb.y, cb.w, cb.h);
+        const tb = kid(c, 'txBody'); if (tb) drawText(tb, { x: cb.x + 6, y: cb.y + 4, w: cb.w - 12, h: cb.h - 8, rot: 0 }, ctx, { header: rows.indexOf(r) === 0 && !sf, defSize: 1400 });
+        xx += cw; });
+      yy += rh; }
+  }
+
+  function lstDefault(ph, layoutSp, masterSp, lvl) {
+    const type = ph && ph.getAttribute('type');
+    let sz = ph ? (/title/i.test(type || '') ? 4400 : type === 'subTitle' ? 2400 : /^(sldNum|dt|ftr)$/.test(type || '') ? 1200 : 2800) : 1800;
+    let bold = ph && /title/i.test(type || ''), col = null, algn = null;
+    for (const s of [masterSp, layoutSp]) { const ls = s && path(s, 'txBody', 'lstStyle'); const lv = ls && kid(ls, 'lvl' + (lvl + 1) + 'pPr'); const d = lv && kid(lv, 'defRPr');
+      if (lv && lv.getAttribute('algn')) algn = lv.getAttribute('algn');
+      if (d) { if (d.getAttribute('sz')) sz = +d.getAttribute('sz'); if (d.getAttribute('b')) bold = d.getAttribute('b') === '1'; const c = color(kid(d, 'solidFill')); if (c) col = c; } }
+    return { sz, bold, col, algn };
+  }
+
+  function drawText(tb, b, ctx, o) {
+    const { g, k } = ctx; const paras = kids(tb, 'p'); if (!paras.length) return;
+    const bp = kid(tb, 'bodyPr'); const ins = n => (+attr(bp, n, n === 'lIns' || n === 'rIns' ? 91440 : 45720)) * k;
+    const x0 = b.x + ins('lIns'), x1 = b.x + b.w - ins('rIns'), y0 = b.y + ins('tIns'), y1 = b.y + b.h - ins('bIns');
+    const anchor = attr(bp, 'anchor', (o.ph && /title|ctrTitle/i.test(o.ph.getAttribute('type') || '')) ? 'ctr' : 't');
+    const fs = bp && kid(bp, 'normAutofit'); const scale = fs && fs.getAttribute('fontScale') ? +fs.getAttribute('fontScale') / 1e5 : 1;
+    const lines = [];
+    const maxW = Math.max(10, x1 - x0);
+    for (const p of paras) {
+      const pPr = kid(p, 'pPr'); const lvl = +attr(pPr, 'lvl', 0); const d = o.header ? { sz: o.defSize || 1400, bold: true, col: '#ffffff', algn: null } : (o.defSize ? { sz: o.defSize, bold: false, col: '#222', algn: null } : lstDefault(o.ph, o.layoutSp, o.masterSp, lvl));
+      const runs = [];
+      for (const r of p.children) {
+        if (r.localName === 'br') { runs.push({ br: true }); continue; }
+        if (r.localName !== 'r' && r.localName !== 'fld') continue;
+        const t = (kid(r, 't') || {}).textContent; if (t == null) continue;
+        const rp = kid(r, 'rPr'); let sz = rp && rp.getAttribute('sz') ? +rp.getAttribute('sz') : d.sz;
+        const col = (rp && color(kid(rp, 'solidFill'))) || d.col || '#1b1b1b';
+        const bold = rp && rp.getAttribute('b') != null ? rp.getAttribute('b') === '1' : d.bold; const ital = rp && rp.getAttribute('i') === '1';
+        runs.push({ t, px: sz / 100 * EMU_PT * k * scale, col, bold, ital });
+      }
+      if (!runs.length) { const ep = kid(p, 'endParaRPr'); const sz = ep && ep.getAttribute('sz') ? +ep.getAttribute('sz') : d.sz; lines.push({ empty: true, h: sz / 100 * EMU_PT * k * scale * 1.2 }); continue; }
+      const full = runs.map(r => r.t || '').join(''); const rtl = attr(pPr, 'rtl') === '1' || (attr(pPr, 'rtl') == null && HAS_RTL.test(full));
+      let algn = (pPr && pPr.getAttribute('algn')) || d.algn || (rtl ? 'r' : 'l');
+      const bu = pPr && (kid(pPr, 'buChar') || kid(pPr, 'buAutoNum')); const indent = (bu ? (lvl + 1) * 38 * k * 12 / 12 : lvl * 30) ;
+      const words = [];
+      for (const r of runs) { if (r.br) { words.push({ br: true }); continue; }
+        const parts = r.t.split(/(\s+)/).filter(s => s !== ''); for (const s of parts) { g.font = `${r.ital ? 'italic ' : ''}${r.bold ? '700 ' : '400 '}${r.px}px Vazirmatn, Tahoma, Arial, sans-serif`; words.push({ s, w: g.measureText(s).width, px: r.px, col: r.col, bold: r.bold, ital: r.ital, sp: /^\s+$/.test(s) }); } }
+      const avail = maxW - (rtl ? 0 : indent) - (rtl ? indent : 0);
+      let cur = [], cw = 0; const push = (last) => { while (cur.length && cur[cur.length - 1].sp) { cw -= cur[cur.length - 1].w; cur.pop(); } if (cur.length || last) lines.push({ words: cur, w: cw, rtl, algn, indent, bullet: bu && !lines.some(l => l.para === p) ? true : false, para: p, h: Math.max(...cur.map(w => w.px), d.sz / 100 * EMU_PT * k * scale) * 1.28 }); cur = []; cw = 0; };
+      for (const w of words) { if (w.br) { push(true); continue; } if (cw + w.w > avail && cur.length && !w.sp) push(); if (!(cur.length === 0 && w.sp)) { cur.push(w); cw += w.w; } }
+      push(true);
+      if (bu) { const first = lines.filter(l => l.para === p)[0]; if (first) first.bullet = true; }
+    }
+    const totalH = lines.reduce((a, l) => a + l.h, 0);
+    let y = anchor === 'ctr' ? y0 + (y1 - y0 - totalH) / 2 : anchor === 'b' ? y1 - totalH : y0;
+    g.save(); g.textBaseline = 'alphabetic';
+    for (const l of lines) {
+      if (l.empty) { y += l.h; continue; }
+      const base = y + l.h * .78; let x;
+      const al = l.algn === 'ctr' ? 'c' : (l.algn === 'r' ? 'r' : l.algn === 'just' ? (l.rtl ? 'r' : 'l') : 'l');
+      if (al === 'c') x = x0 + (maxW - l.w) / 2; else if (al === 'r') x = x1 - l.w - (l.rtl ? l.indent : 0); else x = x0 + (l.rtl ? 0 : l.indent);
+      if (l.bullet) { g.fillStyle = l.words[0].col; g.beginPath(); const bx = l.rtl ? x1 - (al === 'r' ? 0 : 0) + 0 : x0 + l.indent - 22 * k * 8; const r = l.words[0].px * .11; g.arc(l.rtl ? x + l.w + r * 5 : x - r * 4.5, base - l.words[0].px * .3, r, 0, Math.PI * 2); g.fill(); }
+      if (l.rtl) { let cx = x + l.w; for (const w of l.words) { cx -= w.w; draw(w, cx, base); } }
+      else { let cx = x; for (const w of l.words) { draw(w, cx, base); cx += w.w; } }
+      y += l.h;
+    }
+    g.restore();
+    function draw(w, cx, base) { if (w.sp) return; g.font = `${w.ital ? 'italic ' : ''}${w.bold ? '700 ' : '400 '}${w.px}px Vazirmatn, Tahoma, Arial, sans-serif`; g.fillStyle = w.col; g.direction = HAS_RTL.test(w.s) ? 'rtl' : 'ltr'; g.textAlign = 'left'; g.fillText(w.s, cx, base); }
+  }
+
+  return { load };
+})();
+/* ===== Procedural textures, materials and merged static geometry ===== */
+const THREE_ = THREE; let MAPID = 'school', LV = 0, YO = 0;
+function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const R = rng(1234);
+function cnv(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+function speck(g, w, h, n, a, col = '0,0,0', size = 1.6) { for (let i = 0; i < n; i++) { g.fillStyle = `rgba(${col},${R() * a})`; g.fillRect(R() * w, R() * h, size * (0.4 + R()), size * (0.4 + R())); } }
+function shade(hex, f) { const c = parseInt(hex.slice(1), 16); let r = c >> 16, g = (c >> 8) & 255, b = c & 255; r = Math.max(0, Math.min(255, r * f)); g = Math.max(0, Math.min(255, g * f)); b = Math.max(0, Math.min(255, b * f)); return `rgb(${r | 0},${g | 0},${b | 0})`; }
+
+const GEN = {
+  ceramic(g, S) { g.fillStyle = '#cfc9bd'; g.fillRect(0, 0, S, S); const n = 4, t = S / n;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { g.fillStyle = shade('#d9d4c8', .94 + R() * .1); g.fillRect(i * t + 3, j * t + 3, t - 6, t - 6); }
+    speck(g, S, S, 9000, .08); g.strokeStyle = 'rgba(90,85,75,.55)'; g.lineWidth = 4; for (let i = 0; i <= n; i++) { g.beginPath(); g.moveTo(i * t, 0); g.lineTo(i * t, S); g.moveTo(0, i * t); g.lineTo(S, i * t); g.stroke(); } },
+  parquet(g, S) { const rows = 16, h = S / rows; for (let r = 0; r < rows; r++) { let x = -R() * 200; while (x < S) { const w = 190 + R() * 160; const f = .82 + R() * .3; g.fillStyle = shade('#b07a45', f); g.fillRect(x + 1, r * h + 1, w - 2, h - 2);
+        g.strokeStyle = 'rgba(70,40,15,.18)'; g.lineWidth = 1; for (let k = 0; k < 4; k++) { g.beginPath(); const yy = r * h + 4 + R() * (h - 8); g.moveTo(x, yy); g.lineTo(x + w, yy + (R() - .5) * 3); g.stroke(); } x += w; } }
+    g.strokeStyle = 'rgba(40,20,5,.5)'; g.lineWidth = 2; for (let r = 0; r <= rows; r++) { g.beginPath(); g.moveTo(0, r * h); g.lineTo(S, r * h); g.stroke(); } },
+  marble(g, S) { const n = 4, t = S / n; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { g.fillStyle = (i + j) % 2 ? '#d9d4cb' : '#6f7782'; g.fillRect(i * t, j * t, t, t);
+      g.strokeStyle = (i + j) % 2 ? 'rgba(120,110,100,.25)' : 'rgba(230,230,235,.2)'; g.lineWidth = 2; for (let k = 0; k < 6; k++) { g.beginPath(); let x = i * t + R() * t, y = j * t; g.moveTo(x, y); for (let s = 0; s < 6; s++) { x += (R() - .5) * 40; y += t / 6; g.lineTo(x, y); } g.stroke(); } }
+    g.strokeStyle = 'rgba(30,30,30,.4)'; g.lineWidth = 3; for (let i = 0; i <= n; i++) { g.beginPath(); g.moveTo(i * t, 0); g.lineTo(i * t, S); g.moveTo(0, i * t); g.lineTo(S, i * t); g.stroke(); } speck(g, S, S, 4000, .06); },
+  wall(c1, c2, trim) { return (g, S) => { g.fillStyle = c1; g.fillRect(0, 0, S, S); speck(g, S, S, 7000, .035, '90,80,60', 2.4);
+      const wy = S * (1 - 1.1 / 3.4); g.fillStyle = c2; g.fillRect(0, wy, S, S - wy); speck(g, S, S, 4000, .05, '0,0,0', 2);
+      g.fillStyle = trim; g.fillRect(0, wy - 7, S, 14); g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(0, wy + 7, S, 4);
+      g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, S - 22, S, 22); g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(0, S - 22, S, 3); }; },
+  brick(g, S) { g.fillStyle = '#a9a198'; g.fillRect(0, 0, S, S); const rows = 16, bh = S / rows, bw = S / 5;
+    for (let r = 0; r < rows; r++) for (let i = -1; i < 6; i++) { const x = i * bw + (r % 2 ? bw / 2 : 0); g.fillStyle = shade(['#a8523b', '#9c4a36', '#b45e43', '#a04632'][(R() * 4) | 0], .88 + R() * .22); g.fillRect(x + 2, r * bh + 2, bw - 4, bh - 4); }
+    speck(g, S, S, 12000, .12, '40,20,10', 2); },
+  plaster(g, S) { g.fillStyle = '#e8e4da'; g.fillRect(0, 0, S, S); speck(g, S, S, 14000, .05, '90,85,70', 2.6); },
+  ceiling(g, S) { g.fillStyle = '#eeece6'; g.fillRect(0, 0, S, S); const n = 4, t = S / n; g.strokeStyle = 'rgba(80,80,80,.5)'; g.lineWidth = 5; for (let i = 0; i <= n; i++) { g.beginPath(); g.moveTo(i * t, 0); g.lineTo(i * t, S); g.moveTo(0, i * t); g.lineTo(S, i * t); g.stroke(); } speck(g, S, S, 9000, .07, '60,60,60', 1.5); },
+  concrete(g, S) { g.fillStyle = '#9a9ca0'; g.fillRect(0, 0, S, S); speck(g, S, S, 22000, .14, '40,40,45', 2.4); speck(g, S, S, 9000, .12, '255,255,255', 2); },
+  grass(g, S) { g.fillStyle = '#4c7d34'; g.fillRect(0, 0, S, S); for (let i = 0; i < 26000; i++) { g.fillStyle = shade(['#5a8f3d', '#3f6c2c', '#6a9c47', '#477a30'][(R() * 4) | 0], .9 + R() * .2); g.fillRect(R() * S, R() * S, 2, 4 + R() * 6); } },
+  asphalt(g, S) { g.fillStyle = '#3d4044'; g.fillRect(0, 0, S, S); speck(g, S, S, 34000, .25, '255,255,255', 1.8); speck(g, S, S, 12000, .3, '0,0,0', 2.4); },
+  pavers(g, S) { g.fillStyle = '#7d7468'; g.fillRect(0, 0, S, S); const rows = 8, bh = S / rows, bw = S / 4; for (let r = 0; r < rows; r++) for (let i = -1; i < 5; i++) { const x = i * bw + (r % 2 ? bw / 2 : 0); g.fillStyle = shade(['#c9b8a0', '#bfae96', '#d2c2aa'][(R() * 3) | 0], .9 + R() * .15); g.fillRect(x + 3, r * bh + 3, bw - 6, bh - 6); } speck(g, S, S, 10000, .1); },
+  carpet(g, S) { g.fillStyle = '#4d5d78'; g.fillRect(0, 0, S, S); speck(g, S, S, 40000, .22, '255,255,255', 1.4); speck(g, S, S, 30000, .25, '0,0,0', 1.4); },
+  oak(g, S) { g.fillStyle = '#c99a62'; g.fillRect(0, 0, S, S); for (let i = 0; i < 90; i++) { g.strokeStyle = `rgba(110,70,30,${.06 + R() * .12})`; g.lineWidth = 1 + R() * 2; g.beginPath(); const y = R() * S; g.moveTo(0, y); g.bezierCurveTo(S * .3, y + (R() - .5) * 18, S * .7, y + (R() - .5) * 18, S, y + (R() - .5) * 10); g.stroke(); } },
+  walnut(g, S) { g.fillStyle = '#5b3a24'; g.fillRect(0, 0, S, S); for (let i = 0; i < 90; i++) { g.strokeStyle = `rgba(20,8,0,${.1 + R() * .2})`; g.lineWidth = 1 + R() * 2; g.beginPath(); const y = R() * S; g.moveTo(0, y); g.bezierCurveTo(S * .3, y + (R() - .5) * 18, S * .7, y + (R() - .5) * 18, S, y + (R() - .5) * 10); g.stroke(); } },
+  laminate(g, S) { g.fillStyle = '#e6dcc4'; g.fillRect(0, 0, S, S); speck(g, S, S, 5000, .06, '90,70,40', 2); },
+  locker(g, S) { g.fillStyle = '#2f6aa8'; g.fillRect(0, 0, S, S); const dw = S / 2; for (let i = 0; i < 2; i++) { const x = i * dw; g.fillStyle = shade('#3a78bb', .96 + i * .06); g.fillRect(x + 6, 8, dw - 12, S - 16); g.strokeStyle = 'rgba(0,0,0,.4)'; g.lineWidth = 4; g.strokeRect(x + 6, 8, dw - 12, S - 16);
+      g.fillStyle = 'rgba(0,0,0,.55)'; for (let v = 0; v < 6; v++) g.fillRect(x + 40, 40 + v * 14, dw - 80, 6); for (let v = 0; v < 6; v++) g.fillRect(x + 40, S - 130 + v * 14, dw - 80, 6); g.fillStyle = '#d6d9de'; g.fillRect(x + dw - 54, S * .5 - 16, 12, 44); } },
+  leaf(g, S) { g.fillStyle = '#356b2a'; g.fillRect(0, 0, S, S); for (let i = 0; i < 9000; i++) { g.fillStyle = shade(['#3f7d31', '#2c5c24', '#4c8f3a'][(R() * 3) | 0], .85 + R() * .3); g.fillRect(R() * S, R() * S, 5, 5); } },
+  court(g, S) { g.fillStyle = '#2f6b8f'; g.fillRect(0, 0, S, S); speck(g, S, S, 26000, .2, '255,255,255', 1.6); },
+  glassfrost(g, S) { g.fillStyle = '#9fc6dc'; g.fillRect(0, 0, S, S); },
+};
+
+GEN.chk = (g, S) => { g.fillStyle = '#ebe6dc'; g.fillRect(0, 0, S, S); const h = S / 8; for (let i = 0; i <= 8; i++) for (let j = 0; j <= 8; j++) if ((i + j) % 2 === 0) { g.fillStyle = shade('#c98263', .94 + R() * .1); g.beginPath(); g.moveTo(i * h, j * h - h); g.lineTo(i * h + h, j * h); g.lineTo(i * h, j * h + h); g.lineTo(i * h - h, j * h); g.closePath(); g.fill(); } speck(g, S, S, 9000, .06); };
+const MAT = {
+  ceramic: { gen: GEN.ceramic, tile: [2, 2], rough: .35 }, parquet: { gen: GEN.parquet, tile: [2, 2], rough: .5 }, marble: { gen: GEN.marble, tile: [4, 4], rough: .18 },
+  wallBlue: { gen: GEN.wall('#efeadc', '#6f9cc7', '#f6f3ea'), tile: [4, 3.4], rough: .9 }, wallGreen: { gen: GEN.wall('#f1eedd', '#7fb08b', '#f7f4ea'), tile: [4, 3.4], rough: .9 },
+  wallPeach: { gen: GEN.wall('#f3ece0', '#e0a98a', '#f9f5ec'), tile: [4, 3.4], rough: .9 }, wallSand: { gen: GEN.wall('#efe9db', '#c9b48a', '#f6f1e4'), tile: [4, 3.4], rough: .9 },
+  wallGrey: { gen: GEN.wall('#ecece8', '#8e98a4', '#f4f4f0'), tile: [4, 3.4], rough: .9 }, wallLilac: { gen: GEN.wall('#f0ecee', '#a393bd', '#f7f4f6'), tile: [4, 3.4], rough: .9 },
+  brick: { gen: GEN.brick, tile: [2, 2], rough: .85 }, plaster: { gen: GEN.plaster, tile: [4, 4], rough: .9 }, ceiling: { gen: GEN.ceiling, tile: [2.4, 2.4], rough: .95 },
+  concrete: { gen: GEN.concrete, tile: [4, 4], rough: .9 }, grass: { gen: GEN.grass, tile: [3, 3], rough: 1 }, asphalt: { gen: GEN.asphalt, tile: [6, 6], rough: .95 },
+  pavers: { gen: GEN.pavers, tile: [2, 2], rough: .85 }, carpet: { gen: GEN.carpet, tile: [2, 2], rough: 1 }, oak: { gen: GEN.oak, tile: [1, 1], rough: .55 },
+  walnut: { gen: GEN.walnut, tile: [1, 1], rough: .5 }, laminate: { gen: GEN.laminate, tile: [1, 1], rough: .6 }, locker: { gen: GEN.locker, tile: [.8, .8], rough: .45, metal: .3 },
+  leaf: { gen: GEN.leaf, tile: [2, 2], rough: 1 }, court: { gen: GEN.court, tile: [6, 6], rough: .9 },
+  // flat colors
+  white: { color: '#f2f1ec', rough: .7 }, black: { color: '#1b1d21', rough: .6 }, steel: { color: '#9aa3ad', rough: .35, metal: .7 }, darksteel: { color: '#3b4048', rough: .4, metal: .6 },
+  trunk: { color: '#5e4430', rough: 1 }, blue: { color: '#2c5fa6', rough: .6 }, orange: { color: '#e8892b', rough: .6 }, red: { color: '#b3342b', rough: .6 }, green: { color: '#2f8a52', rough: .6 },
+  yellow: { color: '#e9bf2b', rough: .6 }, boardwhite: { color: '#fbfbf8', rough: .35 }, boardgreen: { color: '#244d3e', rough: .8 }, frame: { color: '#c8ccd2', rough: .4, metal: .6 },
+  door: { color: '#7a5130', rough: .55 }, doorframe: { color: '#4a3220', rough: .6 }, roofcol: { color: '#6b6f75', rough: .9 }, line: { color: '#f1efe6', rough: .8 }, tableleg: { color: '#2a2e35', rough: .4, metal: .5 },
+  lamp: { color: '#fffaf0', emissive: '#fff4dc', ei: 1.1 }, glass: { color: '#a9d2ea', rough: .05, trans: .28, noShadow: true }, skin: { color: '#d4a47a' }, plantpot: { color: '#8f5a3c', rough: .8 }, soil: { color: '#3a2a20' },
+  paper: { color: '#efe9d6', rough: .9 }, book1: { color: '#a63a3a' }, book2: { color: '#2f5f9e' }, book3: { color: '#d3a62c' }, book4: { color: '#3c8a5a' }, book5: { color: '#6b4a8f' },
+  flagR: { color: '#da0000', emissive: '#300000', ei: .3 }, flagW: { color: '#f4f4f4' }, flagG: { color: '#239f40' }, screen: { color: '#0e1a2b', emissive: '#254a7a', ei: .6 }, gold: { color: '#d4a017', rough: .3, metal: .8 },
+};
+GEN.chkSq = (g, S) => { const n = 8, t = S / n; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { const dk = (i + j) % 2 === 0; g.fillStyle = dk ? shade('#b9663e', .88 + R() * .2) : shade('#e3e3dd', .92 + R() * .1); g.fillRect(i * t, j * t, t, t);
+    g.strokeStyle = dk ? 'rgba(90,40,18,.22)' : 'rgba(115,120,128,.3)'; g.lineWidth = 2; for (let k = 0; k < 3; k++) { g.beginPath(); let x = i * t + R() * t, y = j * t; g.moveTo(x, y); for (let s = 0; s < 5; s++) { x += (R() - .5) * 26; y += t / 5; g.lineTo(x, y); } g.stroke(); } }
+  speck(g, S, S, 6000, .05); g.strokeStyle = 'rgba(70,64,58,.55)'; g.lineWidth = 3; for (let i = 0; i <= n; i++) { g.beginPath(); g.moveTo(i * t, 0); g.lineTo(i * t, S); g.moveTo(0, i * t); g.lineTo(S, i * t); g.stroke(); } };
+GEN.marbleS = (g, S) => { g.fillStyle = '#d8dbdb'; g.fillRect(0, 0, S, S);
+  for (let i = 0; i < 26; i++) { g.fillStyle = `rgba(${150 + R() * 40 | 0},${155 + R() * 40 | 0},${160 + R() * 40 | 0},${.06 + R() * .1})`; g.beginPath(); g.ellipse(R() * S, R() * S, 40 + R() * 160, 20 + R() * 90, R() * 3, 0, 7); g.fill(); }
+  for (let k = 0; k < 34; k++) { g.strokeStyle = `rgba(95,102,110,${.12 + R() * .25})`; g.lineWidth = .8 + R() * 2.4; g.beginPath(); let x = R() * S, y = R() * S; g.moveTo(x, y); for (let s = 0; s < 9; s++) { x += (R() - .5) * 120; y += (R() - .35) * 90; g.lineTo(x, y); } g.stroke(); } speck(g, S, S, 5000, .05); };
+GEN.marbleBr = (g, S) => { const n = 4, w = S / n; for (let i = 0; i < n; i++) { g.fillStyle = shade('#a65f3b', .86 + R() * .26); g.fillRect(i * w, 0, w, S);
+    for (let k = 0; k < 7; k++) { g.fillStyle = `rgba(${R() > .5 ? '230,190,160' : '70,30,14'},${.06 + R() * .1})`; g.beginPath(); g.ellipse(i * w + R() * w, R() * S, 20 + R() * 70, 40 + R() * 200, R() * 3, 0, 7); g.fill(); }
+    for (let k = 0; k < 9; k++) { g.strokeStyle = `rgba(${R() > .5 ? '240,215,190' : '60,25,10'},${.1 + R() * .2})`; g.lineWidth = .8 + R() * 2; g.beginPath(); let x = i * w + R() * w, y = 0; g.moveTo(x, y); for (let s = 0; s < 8; s++) { x += (R() - .5) * 40; y += S / 8; g.lineTo(Math.max(i * w + 3, Math.min((i + 1) * w - 3, x)), y); } g.stroke(); } }
+  g.strokeStyle = 'rgba(235,228,215,.9)'; g.lineWidth = 5; for (let i = 0; i <= n; i++) { g.beginPath(); g.moveTo(i * w, 0); g.lineTo(i * w, S); g.stroke(); } speck(g, S, S, 3000, .05); };
+Object.assign(MAT, { chkSq: { gen: GEN.chkSq, tile: [3.2, 3.2], rough: .25 }, marbleS: { gen: GEN.marbleS, tile: [1.6, 1.6], rough: .2 }, marbleBr: { gen: GEN.marbleBr, tile: [2.4, 1.0], rough: .22 }, stripe: { color: '#33373d', rough: .5 }, artgrass: { color: '#2f9a3a', rough: 1 }, blackpot: { color: '#17181b', rough: .5 }, leafDark: { color: '#1f6a33', rough: .8 }, berry: { color: '#e0701c', rough: .6 }, pink: { color: '#d9577f', rough: .6 }, rose: { color: '#c22b3a', rough: .6 }, rail: { color: '#f4f3ee', rough: .45 } });
+Object.assign(MAT, { chk: { gen: GEN.chk, tile: [2.4, 2.4], rough: .28 }, wallAm: { gen: GEN.wall('#f3eed3', '#a46b57', '#ece3d2'), tile: [4, 3.4], rough: .85 }, turf: { color: '#3f8f46', rough: 1 }, track: { color: '#a8452f', rough: 1 } });
+const _mats = {}, _tex = {}; let ANISO = 4;
+function texOf(key) { if (_tex[key]) return _tex[key]; const d = MAT[key]; const S = 1024; const c = cnv(S, S); d.gen(c.getContext('2d'), S);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.encoding = THREE.sRGBEncoding; t.anisotropy = ANISO; return (_tex[key] = t); }
+function getMat(key) { if (_mats[key]) return _mats[key]; const d = MAT[key]; if (!d) throw new Error('mat ' + key);
+  const p = { roughness: d.rough ?? .8, metalness: d.metal ?? 0 };
+  if (d.gen) p.map = texOf(key); else p.color = new THREE.Color(d.color);
+  if (d.emissive) { p.emissive = new THREE.Color(d.emissive); p.emissiveIntensity = d.ei || 1; }
+  if (d.trans) { p.transparent = true; p.opacity = d.trans; p.depthWrite = false; p.side = THREE.DoubleSide; }
+  return (_mats[key] = new THREE.MeshStandardMaterial(p)); }
+
+/* ---- static geometry builder: everything merges to one mesh per material ---- */
+const Build = { groups: {}, colliders: [], sit: [], ramps: [], tris: 0 };
+function resetBuild() { ROOMS.length = 0; BOARDS.length = 0; LIGHTSPOTS.length = 0; EXTRA_MESH.length = 0; Build.groups = {}; Build.colliders = []; Build.sit = []; Build.ramps = []; LV = 0; YO = 0; }
+function worldUV(geo, tile) {
+  const p = geo.attributes.position, n = geo.attributes.normal, uv = new Float32Array(p.count * 2);
+  for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i), ax = Math.abs(n.getX(i)), ay = Math.abs(n.getY(i)), az = Math.abs(n.getZ(i)); let u, v;
+    if (ay >= ax && ay >= az) { u = x / tile[0]; v = z / tile[1]; } else if (ax >= az) { u = z / tile[0]; v = y / tile[1]; } else { u = x / tile[0]; v = y / tile[1]; }
+    uv[i * 2] = u; uv[i * 2 + 1] = v; }
+  geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+}
+function put(geo, key, keepUV) {
+  if (geo.index) geo = geo.toNonIndexed();
+  const d = MAT[key]; if (d.gen && !keepUV) worldUV(geo, d.tile);
+  (Build.groups[key] = Build.groups[key] || []).push(geo); Build.tris += geo.attributes.position.count / 3;
+}
+const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler();
+function xf(geo, x, y, z, ry = 0, rx = 0, rz = 0) { _e.set(rx, ry, rz, 'YXZ'); _q.setFromEuler(_e); _m.compose(new THREE.Vector3(x, y + YO, z), _q, new THREE.Vector3(1, 1, 1)); geo.applyMatrix4(_m); return geo; }
+function box(key, x, y, z, w, h, d, ry = 0) { put(xf(new THREE.BoxGeometry(w, h, d), x, y, z, ry), key); }
+function boxCorner(key, x0, y0, z0, x1, y1, z1) { box(key, (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, x1 - x0, y1 - y0, z1 - z0); }
+function plane(key, x, y, z, w, h, ry = 0, rx = 0, keepUV = false) { put(xf(new THREE.PlaneGeometry(w, h), x, y, z, ry, rx), key, keepUV); }
+function cyl(key, x, y, z, rt, rb, h, seg = 12) { put(xf(new THREE.CylinderGeometry(rt, rb, h, seg), x, y, z), key); }
+function sph(key, x, y, z, r, sx = 1, sy = 1, sz = 1, seg = 10) { const g = new THREE.SphereGeometry(r, seg, seg - 2); g.scale(sx, sy, sz); put(xf(g, x, y, z), key); }
+function solid(minx, maxx, minz, maxz, tag, hy) { Build.colliders.push({ minx, maxx, minz, maxz, tag, lv: LV, hy }); }
+function solidBox(cx, cz, w, d, ry = 0, tag) { const q = Math.abs(Math.sin(ry)) > .7; const hw = (q ? d : w) / 2, hd = (q ? w : d) / 2; solid(cx - hw, cx + hw, cz - hd, cz + hd, tag); }
+
+function mergeGeos(list) {
+  let n = 0; for (const g of list) n += g.attributes.position.count;
+  const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2); let o = 0;
+  for (const g of list) { pos.set(g.attributes.position.array, o * 3); nor.set(g.attributes.normal.array, o * 3); if (g.attributes.uv) uv.set(g.attributes.uv.array, o * 2); o += g.attributes.position.count; }
+  const m = new THREE.BufferGeometry(); m.setAttribute('position', new THREE.BufferAttribute(pos, 3)); m.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); m.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); return m;
+}
+function finishBuild(scene) {
+  for (const key in Build.groups) { const m = new THREE.Mesh(mergeGeos(Build.groups[key]), getMat(key)); m.frustumCulled = false; m.castShadow = !MAT[key].noShadow; m.receiveShadow = true; if (MAT[key].trans) m.renderOrder = 5; scene.add(m); }
+  Build.groups = {};
+}
+
+/* ---- walls with openings ---- */
+const WALL_H = 3.4;
+// axis 'x': runs along x at z=fix ; axis 'z': runs along z at x=fix. openings: [{c,w,y0,y1,t:'door'|'win'}]
+function wall(axis, fix, a, b, matNeg, matPos, ops = [], thick = .24, opts = {}) {
+  const H = opts.h || WALL_H, hh = thick / 2; ops = ops.slice().sort((p, q) => p.c - q.c);
+  const slab = (s0, s1, y0, y1) => { if (s1 - s0 < .005 || y1 - y0 < .005) return;
+    const L = s1 - s0, mid = (s0 + s1) / 2, ym = (y0 + y1) / 2, hy = y1 - y0;
+    if (axis === 'x') { box(matNeg, mid, ym, fix - hh / 2, L, hy, hh); box(matPos, mid, ym, fix + hh / 2, L, hy, hh); }
+    else { box(matNeg, fix - hh / 2, ym, mid, hh, hy, L); box(matPos, fix + hh / 2, ym, mid, hh, hy, L); } };
+  let cur = a; const solidSegs = [];
+  for (const o of ops) { const s0 = o.c - o.w / 2, s1 = o.c + o.w / 2; slab(cur, s0, 0, H); if (o.t === 'door') { solidSegs.push([cur, s0]); slab(s0, s1, o.y1, H); } else { slab(s0, s1, 0, o.y0); slab(s0, s1, o.y1, H); solidSegs.push([cur, s1]); } cur = s1; if (o.t === 'door') { } }
+  slab(cur, b, 0, H); solidSegs.push([cur, b]);
+  // merge contiguous solid segs
+  const segs = []; for (const s of solidSegs.sort((p, q) => p[0] - q[0])) { const l = segs[segs.length - 1]; if (l && Math.abs(l[1] - s[0]) < .01) l[1] = s[1]; else segs.push([s[0], s[1]]); }
+  for (const [s0, s1] of segs) { if (s1 - s0 < .02) continue; if (axis === 'x') solid(s0, s1, fix - hh, fix + hh, 'wall'); else solid(fix - hh, fix + hh, s0, s1, 'wall'); }
+  for (const o of ops) {
+    const s0 = o.c - o.w / 2, s1 = o.c + o.w / 2, f = .07;
+    const P = (c, y, w, h, dd) => { if (axis === 'x') box('doorframe', c, y, fix, w, h, dd); else box('doorframe', fix, y, c, dd, h, w); };
+    if (o.t === 'door') { P(s0 + f / 2, o.y1 / 2, f, o.y1, thick + .06); P(s1 - f / 2, o.y1 / 2, f, o.y1, thick + .06); P(o.c, o.y1 - f / 2, o.w, f, thick + .06);
+      if (!o.noLeaf) { const hinge = o.hinge || -1, lw = o.w - .1; const hc = hinge < 0 ? s0 + .04 : s1 - .04; const into = (o.into || 1) * (thick / 2 + .03 + lw / 2);
+        if (axis === 'x') box('door', hc, o.y1 / 2 - .03, fix + into, .045, o.y1 - .08, lw); else box('door', fix + into, o.y1 / 2 - .03, hc, lw, o.y1 - .08, .045);
+        const kx = hinge < 0 ? lw * .85 : lw * .15; if (axis === 'x') box('gold', hc, 1.0, fix + into + (hinge < 0 ? 1 : -1) * 0, .08, .05, .05); } }
+    else { const w = o.w, h = o.y1 - o.y0, ym = (o.y0 + o.y1) / 2;
+      P(s0 + f / 2, ym, f, h, thick + .04); P(s1 - f / 2, ym, f, h, thick + .04); P(o.c, o.y0 + f / 2, w, f, thick + .1); P(o.c, o.y1 - f / 2, w, f, thick + .04); P(o.c, ym, .05, h, thick + .02);
+      if (axis === 'x') plane('glass', o.c, ym, fix, w - f * 2, h - f * 2, 0); else plane('glass', fix, ym, o.c, w - f * 2, h - f * 2, Math.PI / 2); }
+  }
+}
+/* ===== School layout: shell, floors, walls, exterior ===== */
+const FA = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const SCH = { x0: -28, x1: 28, zb: -10, zf: 10, c0: -2.5, c1: 2.5, H: WALL_H };
+const ROOMS = []; const BOARDS = []; const LIGHTSPOTS = []; const EXTRA_MESH = [];
+let CLASS_N = 6; const CW = (SCH.x1 - SCH.x0) / 6;
+const CLASS_WALLS = ['wallBlue', 'wallGreen', 'wallPeach', 'wallLilac', 'wallSand', 'wallGrey'];
+let CLASS_NAMES = ['کلاس اول', 'کلاس دوم', 'کلاس سوم', 'کلاس چهارم', 'کلاس پنجم', 'کلاس ششم'];
+
+function addRoom(id, name, type, x0, x1, z0, z1, wallKey, floorKey) {
+  const r = { id, name, type, x0, x1, z0, z1, wallKey, floorKey, cx: (x0 + x1) / 2, cz: (z0 + z1) / 2 }; ROOMS.push(r); return r;
+}
+const RM = id => ROOMS.find(r => r.id === id);
+function defineRooms() {
+  ROOMS.length = 0;
+  for (let i = 0; i < CLASS_N; i++) addRoom('class' + i, CLASS_NAMES[i], 'class', SCH.x0 + i * CW, SCH.x0 + (i + 1) * CW, SCH.zb, SCH.c0, CLASS_WALLS[i], 'parquet');
+  addRoom('office', 'دفتر مدرسه', 'office', -28, -18, SCH.c1, SCH.zf, 'wallSand', 'carpet');
+  addRoom('principal', 'اتاق مدیر', 'principal', -18, -8, SCH.c1, SCH.zf, 'wallGrey', 'carpet');
+  addRoom('lobby', 'ورودی مدرسه', 'lobby', -8, 8, SCH.c1, SCH.zf, 'wallBlue', 'marble');
+  addRoom('teachers', 'اتاق معلمان', 'teachers', 8, 18, SCH.c1, SCH.zf, 'wallGreen', 'parquet');
+  addRoom('library', 'کتابخانه', 'library', 18, 28, SCH.c1, SCH.zf, 'wallLilac', 'carpet');
+  addRoom('corridor', 'راهرو', 'corridor', SCH.x0, SCH.x1, SCH.c0, SCH.c1, 'wallSand', 'ceramic');
+}
+
+const _signCache = {};
+function textCanvas(text, w, h, o = {}) {
+  const c = cnv(w, h), g = c.getContext('2d'); g.fillStyle = o.bg || '#1f3a5f'; g.fillRect(0, 0, w, h);
+  if (o.border) { g.strokeStyle = o.border; g.lineWidth = Math.max(3, h * .06); g.strokeRect(g.lineWidth, g.lineWidth, w - g.lineWidth * 2, h - g.lineWidth * 2); }
+  g.fillStyle = o.fg || '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.direction = 'rtl'; g.font = `${o.weight || 700} ${Math.round(h * (o.size || .55))}px Vazirmatn, Tahoma, sans-serif`;
+  g.fillText(text, w / 2, h / 2 + h * .03); return c;
+}
+function signMesh(text, x, y, z, ry, w, h, o = {}) {
+  const key = text + '|' + w + '|' + (o.bg || ''); let mat = _signCache[key];
+  if (!mat) { const t = new THREE.CanvasTexture(textCanvas(text, 512, Math.round(512 * h / w), o)); t.encoding = THREE.sRGBEncoding; t.anisotropy = ANISO; mat = _signCache[key] = new THREE.MeshStandardMaterial({ map: t, roughness: .5 }); }
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); m.position.set(x, y + YO, z); m.rotation.y = ry; m.receiveShadow = true; EXTRA_MESH.push(m); return m;
+}
+
+function buildShell() {
+  const { x0, x1, zb, zf, c0, c1, H } = SCH;
+  // ground & yard
+  plane('grass', 0, -.03, 0, 400, 400, 0, -Math.PI / 2);
+  plane('asphalt', 0, -.02, 25, 56, 30, 0, -Math.PI / 2);
+  plane('court', 17, -.01, 26, 22, 16, 0, -Math.PI / 2);
+  plane('pavers', 0, -.005, 20, 6.5, 22, 0, -Math.PI / 2);
+  plane('pavers', 0, -.005, 36, 6.5, 8, 0, -Math.PI / 2);
+  plane('pavers', 0, -.005, -14, 60, 8, 0, -Math.PI / 2);
+  plane('concrete', 0, .0, 0, 60, 24, 0, -Math.PI / 2); // slab under the building
+  // floors
+  for (const r of ROOMS) plane(r.floorKey, r.cx, .012, r.cz, r.x1 - r.x0, r.z1 - r.z0, 0, -Math.PI / 2);
+  // ceiling & roof
+  plane('ceiling', 0, H - .005, 0, 56, 20, 0, Math.PI / 2);
+  box('concrete', 0, H + .15, 0, 57, .3, 21);
+  box('plaster', 0, H + .55, zf + .15, 57.2, .5, .3); box('plaster', 0, H + .55, zb - .15, 57.2, .5, .3);
+  box('plaster', x0 - .15, H + .55, 0, .3, .5, 21); box('plaster', x1 + .15, H + .55, 0, .3, .5, 21);
+  // entrance tower & canopy
+  box('plaster', 0, H + 1.4, zf - 1.2, 13, 2.2, 3.2); box('blue', 0, H + 2.55, zf - 1.2, 13.4, .24, 3.5);
+  box('concrete', 0, 3.05, zf + 2.2, 11.5, .26, 4.6); box('blue', 0, 3.2, zf + 4.5, 11.5, .2, .14);
+  for (const sx of [-5.4, 5.4]) { solid(sx - .3, sx + .3, zf + 3.8, zf + 4.4, 'pillar'); cyl('plaster', sx, 1.5, zf + 4.1, .26, .3, 3.0, 16); box('concrete', sx, .08, zf + 4.1, .8, .16, .8); }
+  for (let i = 0; i < 4; i++) box('steel', -5.2 + i * 3.47, 3.35, zf + 2.2, .08, .14, 4.6);
+  // steps up to entrance
+  box('concrete', 0, .025, zf + 1.4, 10, .05, 1.4); box('concrete', 0, .05, zf + .6, 10, .1, 1.2);
+  // rooftop machinery
+  box('steel', -18, H + .6, 0, 2.2, 1, 1.4); box('steel', 16, H + .6, -4, 2.2, 1, 1.4); cyl('darksteel', -18, H + 1.3, 0, .5, .5, .3, 14); cyl('darksteel', 16, H + 1.3, -4, .5, .5, .3, 14);
+  box('glass', -24, H + .8, 4, 2.4, .8, 1.8); box('doorframe', -24, H + .35, 4, 2.6, .7, 2);
+  box('glass', 23, H + .8, 4, 2.4, .8, 1.8); box('doorframe', 23, H + .35, 4, 2.6, .7, 2);
+
+  const win = (c, w = 1.8, y0 = 1.0, y1 = 2.6) => ({ c, w, y0, y1, t: 'win' });
+  const door = (c, w = 1.0, o = {}) => Object.assign({ c, w, y0: 0, y1: 2.15, t: 'door' }, o);
+
+  // back exterior wall: per class
+  for (let i = 0; i < CLASS_N; i++) { const r = ROOMS[i]; wall('x', zb, r.x0, r.x1, 'brick', r.wallKey, [win(r.cx - 3.4, 1.5), win(r.cx + 3.4, 1.5)]); }
+  // class partitions
+  for (let i = 1; i < CLASS_N; i++) wall('z', SCH.x0 + i * CW, zb, c0, ROOMS[i - 1].wallKey, ROOMS[i].wallKey, []);
+  // corridor-side wall of classes (z=c0): class interior is -z side
+  for (let i = 0; i < CLASS_N; i++) { const r = ROOMS[i]; wall('x', c0, r.x0, r.x1, r.wallKey, 'wallSand', [door(r.x0 + 1.25, 1.0, { hinge: -1, into: -1 }), win(r.x0 + 5.6, 2.6, 1.2, 2.5)]); }
+  // front exterior wall z=zf (inside faces -z)
+  wall('x', zf, -28, -18, RM('office').wallKey, 'brick', [win(-25.3), win(-20.7)]);
+  wall('x', zf, -18, -8, RM('principal').wallKey, 'brick', [win(-15.3), win(-10.7)]);
+  wall('x', zf, -8, 8, RM('lobby').wallKey, 'brick', [{ c: -5.3, w: 1.8, y0: .3, y1: 2.9, t: 'win' }, { c: 5.3, w: 1.8, y0: .3, y1: 2.9, t: 'win' }, { c: 0, w: 3.4, y0: 0, y1: 2.7, t: 'door', noLeaf: true }]);
+  wall('x', zf, 8, 18, RM('teachers').wallKey, 'brick', [win(10.7), win(15.3)]);
+  wall('x', zf, 18, 28, RM('library').wallKey, 'brick', [win(20.4, 1.7), win(23, 1.7), win(25.6, 1.7)]);
+  // front partitions
+  for (const px of [-18, -8, 8, 18]) { const a = ROOMS.find(r => r.x1 === px && r.z0 === c1), b = ROOMS.find(r => r.x0 === px && r.z0 === c1); wall('z', px, c1, zf, a.wallKey, b.wallKey, []); }
+  // front rooms toward corridor (z=c1): rooms are on +z side
+  const fr = (id, doorX, extra = []) => { const r = ROOMS.find(q => q.id === id); wall('x', c1, r.x0, r.x1, 'wallSand', r.wallKey, [door(doorX, 1.0, { hinge: 1, into: 1 })].concat(extra)); };
+  fr('office', -19.5); fr('principal', -9.5); fr('teachers', 9.5); fr('library', 20, [win(24.6, 2.2, 1.2, 2.5)]);
+  // lobby side-walls toward offices already by partitions; corridor ends
+  for (const [sx, ra, rb] of [[x0, ROOMS[0], RM('office')], [x1, ROOMS[5], RM('library')]]) {
+    const pr = (k) => sx < 0 ? ['brick', k] : [k, 'brick'];
+    wall('z', sx, zb, c0, ...pr(ra.wallKey), [win((zb + c0) / 2, 2.2)]);
+    wall('z', sx, c0, c1, ...pr('wallSand'), [{ c: 0, w: 2.2, y0: .5, y1: 2.8, t: 'win' }]);
+    wall('z', sx, c1, zf, ...pr(rb.wallKey), [win((c1 + zf) / 2, 2.2)]);
+  }
+  // wall base skirts & ceiling crown (cheap detail)
+  box('white', 0, H - .05, c0 + .13, 56, .1, .03); box('white', 0, H - .05, c1 - .13, 56, .1, .03);
+  // exterior facade bands
+  box('plaster', 0, 0.35, zf + .05, 56.4, .7, .1); box('plaster', 0, 0.35, zb - .05, 56.4, .7, .1);
+  box('plaster', 0, H - .25, zf + .1, 56.6, .5, .2); box('plaster', 0, H - .25, zb - .1, 56.6, .5, .2);
+  // lamps (ceiling panels) and light spots
+  for (let i = 0; i < CLASS_N; i++) { const r = ROOMS[i]; for (const dx of [-2.2, 2.2]) for (const dz of [-1.9, 1.9]) lamp(r.cx + dx, r.cz + dz); LIGHTSPOTS.push({ x: r.cx, y: 2.9, z: r.cz, i: 1.0, d: 13, room: r.id }); }
+  for (let x = -24; x <= 24; x += 6) { lamp(x, 0, 1.6, .22); LIGHTSPOTS.push({ x, y: 3.0, z: 0, i: .8, d: 11, room: 'corridor' }); }
+  for (const id of ['office', 'principal', 'teachers', 'library']) { const r = ROOMS.find(q => q.id === id); for (const dx of [-2.2, 2.2]) for (const dz of [-1.8, 1.8]) lamp(r.cx + dx, r.cz + dz); LIGHTSPOTS.push({ x: r.cx, y: 2.9, z: r.cz, i: 1.0, d: 13, room: id }); }
+  for (const dx of [-4.5, 0, 4.5]) for (const dz of [-1.8, 1.8]) lamp(dx, 6.25 + dz); LIGHTSPOTS.push({ x: 0, y: 2.9, z: 6.2, i: 1.2, d: 15, room: 'lobby' });
+  // door signs (above each door, on corridor side)
+  for (let i = 0; i < CLASS_N; i++) { const r = ROOMS[i]; EXTRA_MESH.push(signMesh(r.name, r.x0 + 1.25, 2.4, c0 + .2, 0, .9, .26, { bg: '#1f3a5f', border: '#e8c15a' })); }
+  const fs = { office: -19.5, principal: -9.5, teachers: 9.5, library: 20 };
+  for (const id in fs) { const r = ROOMS.find(q => q.id === id); signMesh(r.name, fs[id], 2.4, c1 - .2, Math.PI, .9, .26, { bg: '#4a2f55', border: '#e8c15a' }); }
+}
+function lamp(x, z, w = 1.2, d = .3) { box('lamp', x, SCH.H - .03, z, w, .05, d); }
+
+function buildFacadeAndYard() {
+  const { zf, zb, x0, x1, H } = SCH;
+  // school nameplate on the tower
+  signMesh('دبیرستان نمونه', 0, H + 1.45, zf + .43, 0, 7.6, 1.5, { bg: '#16365f', fg: '#f4e9c4', border: '#e8c15a', size: .6 });
+  signMesh('به مدرسه خوش آمدید', 0, 2.95, zf + 4.6, 0, 5.6, .5, { bg: '#e8c15a', fg: '#1c2a3d', size: .6 });
+  // fence + gate
+  const fz = 41;
+  for (let x = -58; x <= 58; x += 2) { if (Math.abs(x) < 3.6) continue; box('darksteel', x, .9, fz, .05, 1.8, .05); }
+  box('darksteel', -30.5, 1.6, fz, 55, .06, .06); box('darksteel', 30.5, 1.6, fz, 55, .06, .06); box('darksteel', -30.5, .25, fz, 55, .06, .06); box('darksteel', 30.5, .25, fz, 55, .06, .06);
+  solid(-58, -3.4, fz - .2, fz + .2, 'fence'); solid(3.4, 58, fz - .2, fz + .2, 'fence');
+  for (const sx of [-3.6, 3.6]) { box('plaster', sx, 1.3, fz, .6, 2.6, .6); box('blue', sx, 2.65, fz, .75, .12, .75); }
+  box('darksteel', 0, 2.5, fz, 7.2, .1, .1); // gate arch bar
+  for (const side of [-1, 1]) { box('darksteel', side * 3.0, 1.0, fz + .1, 1.5, .08, .05); for (let k = 0; k < 8; k++) box('darksteel', side * (2.35 + k * .17), .95, fz + .1, .035, 1.7, .035); }
+  // side fences and back
+  solid(-58, -57.8, -25, fz, 'fence'); solid(57.8, 58, -25, fz, 'fence'); solid(-58, 58, -25.2, -25, 'fence');
+  box('darksteel', -58, 1, 8, .06, 2, 98); box('darksteel', 58, 1, 8, .06, 2, 98); box('darksteel', 0, 1, -25, 116, 2, .06);
+  // flag pole
+  cyl('steel', -9, 4.5, 20, .07, .09, 9, 10); sph('gold', -9, 9.05, 20, .13); box('flagG', -8.35, 8.4, 20, 1.3, .22, .02); box('flagW', -8.35, 8.18, 20, 1.3, .22, .02); box('flagR', -8.35, 7.96, 20, 1.3, .22, .02);
+  cyl('concrete', -9, .15, 20, .55, .6, .3, 14); solid(-9.5, -8.5, 19.5, 20.5, 'pole');
+  // lamp posts
+  for (const [x, z] of [[-4.6, 16], [4.6, 16], [-4.6, 30], [4.6, 30], [-30, 14], [30, 14]]) { cyl('darksteel', x, 2.2, z, .05, .07, 4.4, 8); sph('lamp', x, 4.5, z, .25); solid(x - .12, x + .12, z - .12, z + .12, 'lamp'); }
+  // basketball court markings and hoops
+  const cx = 17, cz = 26; for (const [w, d, x, z] of [[22, .12, cx, cz - 8], [22, .12, cx, cz + 8], [.12, 16, cx - 11, cz], [.12, 16, cx + 11, cz], [.12, 16, cx, cz]]) box('line', x, .015, z, w, .01, d);
+  for (const sx of [-1, 1]) { const hx = cx + sx * 10.2; cyl('steel', hx + sx * .4, 1.6, cz, .06, .06, 3.2, 8); box('boardwhite', hx, 3.0, cz, .06, .9, 1.4); box('red', hx - sx * .22, 2.78, cz, .4, .04, .04); solid(hx + sx * .4 - .1, hx + sx * .4 + .1, cz - .1, cz + .1, 'hoop'); }
+  // benches along path
+  for (const [x, z, ry] of [[-4.6, 22, -Math.PI / 2], [4.6, 22, Math.PI / 2], [-4.6, 28, -Math.PI / 2], [4.6, 28, Math.PI / 2]]) bench(x, z, ry);
+  // trees
+  const trees = [[-20, 20], [-24, 28], [-14, 30], [-34, 18], [34, 18], [-40, 30], [42, 32], [-30, 36], [26, 38], [-12, 36], [12, 37], [-45, 10], [45, 8], [-38, -4], [38, -6], [-20, -18], [-10, -20], [4, -19], [16, -17], [28, -20], [-30, -16], [40, -16]];
+  for (const [x, z] of trees) tree(x, z, .9 + ((x * 7 + z * 3) % 5) * .08);
+  for (const [x, z] of [[-6, 12], [6, 12], [-10.5, 12.2], [10.5, 12.2], [-18, 12.2], [18, 12.2], [-24, 12.2], [24, 12.2]]) bush(x, z);
+  // back yard benches
+  bench(-10, -13, Math.PI); bench(10, -13, Math.PI);
+}
+function tree(x, z, s = 1) { cyl('trunk', x, 1.4 * s, z, .18 * s, .28 * s, 2.8 * s, 8); sph('leaf', x, 3.8 * s, z, 1.9 * s, 1, .9, 1, 9); sph('leaf', x + .9 * s, 3.2 * s, z + .4 * s, 1.3 * s, 1, .9, 1, 8); sph('leaf', x - .8 * s, 3.3 * s, z - .5 * s, 1.4 * s, 1, .9, 1, 8); solid(x - .3, x + .3, z - .3, z + .3, 'tree'); }
+function bush(x, z) { sph('leaf', x, .5, z, .75, 1.3, .8, 1, 8); }
+function bench(x, z, ry) { const b = L(x, z, ry); b('oak', 0, .45, 0, 1.6, .06, .45); b('oak', 0, .8, .22, 1.6, .4, .05); for (const sx of [-.7, .7]) b('tableleg', sx, .22, 0, .06, .44, .4); solidBox(x, z, 1.7, .6, ry, 'bench'); Build.sit.push({ x, z, yaw: ry, y: .45, name: 'نیمکت', offs: 0 }); }
+function L(x, z, ry) { const c = Math.cos(ry), s = Math.sin(ry); return (key, lx, ly, lz, w, h, d) => box(key, x + lx * c + lz * s, ly, z - lx * s + lz * c, w, h, d, ry); }
+/* ===== Furniture, rooms, boards ===== */
+function disc(key, x, y, z, r, ry = 0, th = .03) { put(xf(new THREE.CylinderGeometry(r, r, th, 20), x, y, z, ry, Math.PI / 2), key); }
+function chair(x, z, yaw, seat = 'blue', o = {}) {
+  const b = L(x, z, yaw), h = o.h || .45;
+  b(seat, 0, h, 0, .42, .05, .42); b(seat, 0, h + .27, .2, .42, .36, .04);
+  for (const sx of [-.18, .18]) for (const sz of [-.18, .18]) b('tableleg', sx, h / 2, sz, .03, h, .03);
+  b('tableleg', 0, h * .75, .2, .38, .02, .02);
+  Build.sit.push({ x, z, yaw, y: h + .03, name: o.name || 'صندلی' }); solidBox(x, z, .4, .4, 0, 'chair');
+}
+function swivel(x, z, yaw, col = 'darksteel') {
+  const b = L(x, z, yaw);
+  b(col, 0, .5, 0, .5, .08, .5); b(col, 0, .85, .24, .46, .6, .08); cyl('steel', x, .27, z, .03, .03, .5, 8);
+  for (let k = 0; k < 5; k++) { const a = k * Math.PI * 2 / 5; box('darksteel', x + Math.cos(a) * .22, .05, z + Math.sin(a) * .22, .3, .04, .05, -a); }
+  for (const sx of [-.27, .27]) b(col, sx, .68, 0, .05, .04, .36);
+  Build.sit.push({ x, z, yaw, y: .52, name: 'صندلی اداری' }); solidBox(x, z, .5, .5, 0, 'chair');
+}
+function studentDesk(x, z, yaw = 0) {
+  const b = L(x, z, yaw), c = Math.cos(yaw), s = Math.sin(yaw), pp = (lx, lz) => [x + lx * c + lz * s, z - lx * s + lz * c];
+  b('laminate', 0, .74, 0, 1.2, .04, .55); b('oak', 0, .715, -.27, 1.2, .03, .02);
+  for (const sx of [-.55, .55]) for (const sz of [-.22, .22]) b('tableleg', sx, .36, sz, .035, .72, .035);
+  b('tableleg', 0, .3, .22, 1.1, .02, .02); b('darksteel', 0, .55, .02, 1.05, .18, .4);
+  solidBox(x, z, 1.2, .55, yaw, 'desk');
+  const R2 = rng((x * 100 + z * 10) | 0);
+  for (const sx of [-.3, .3]) { let [px, pz] = pp(sx, .05); box('paper', px, .77, pz, .22, .02, .3, yaw + (R2() - .5) * .3); if (R2() > .4) { [px, pz] = pp(sx + .05, .04); box(['book1', 'book2', 'book4', 'book5'][(R2() * 4) | 0], px, .79, pz, .18, .02, .26, yaw + (R2() - .5) * .4); } [px, pz] = pp(sx - .22, .15); box('yellow', px, .765, pz, .02, .02, .12, yaw); }
+}
+function plant(x, z, s = 1) { cyl('plantpot', x, .22 * s, z, .2 * s, .15 * s, .44 * s, 10); sph('leaf', x, .8 * s, z, .34 * s, 1, 1.4, 1, 7); sph('leaf', x + .12 * s, 1.15 * s, z + .05 * s, .24 * s, 1, 1.3, 1, 7); sph('leaf', x - .12 * s, 1.0 * s, z - .06 * s, .22 * s, 1, 1.2, 1, 7); solid(x - .22 * s, x + .22 * s, z - .22 * s, z + .22 * s, 'plant'); }
+function bookcase(x, z, ry, w = 2, h = 2.1, d = .35, o = {}) {
+  const b = L(x, z, ry), R3 = rng((x * 31 + z * 17) | 0), key = o.key || 'walnut';
+  b(key, 0, h / 2, d / 2 - .01, w, h, .03); b(key, -w / 2 + .02, h / 2, 0, .04, h, d); b(key, w / 2 - .02, h / 2, 0, .04, h, d); b(key, 0, h, 0, w, .04, d); b(key, 0, .06, 0, w, .12, d);
+  const rows = Math.round(h / .38); for (let r = 0; r < rows; r++) { const y = .12 + r * (h - .16) / rows; b(key, 0, y, 0, w - .06, .03, d - .02);
+    let xx = -w / 2 + .08; const bh0 = (h - .16) / rows - .08; while (xx < w / 2 - .12) { const bw = .03 + R3() * .04, bh = bh0 * (.65 + R3() * .35); if (R3() > .1) b(['book1', 'book2', 'book3', 'book4', 'book5', 'paper', 'white'][(R3() * 7) | 0], xx + bw / 2, y + .015 + bh / 2, .02, bw, bh, d * .7); xx += bw + .004; } }
+  solidBox(x, z, w, d, ry, 'shelf');
+}
+function cabinet(x, z, ry, w, h, d, key = 'walnut') { box(key, x, h / 2, z, ...(Math.abs(Math.sin(ry)) > .7 ? [d, h, w] : [w, h, d])); const b = L(x, z, ry); b('gold', 0, h * .55, -d / 2 - .01, .03, .15, .02); solidBox(x, z, w, d, ry, 'cab'); }
+function clock(x, y, z, ry) { const b = L(x, z, ry); disc('white', x, y, z, .26, ry, .05); disc('black', x, y, z, .28, ry, .04); const c = Math.cos(ry), s = Math.sin(ry); disc('white', x + s * .03, y, z + c * .03, .24, ry, .03); b('black', 0, y + .08, .055, .015, .16, .01); b('black', .07, y, .055, .12, .015, .01); }
+function noticeBoard(x, y, z, ry, w = 1.2, h = .8) { const b = L(x, z, ry); b('oak', 0, y, 0, w + .08, h + .08, .03); b('plaster', 0, y, .005, w, h, .03); b('walnut', 0, y, .02, w - .04, h - .04, .01);
+  const R4 = rng((x * 13 + z * 7 + y) | 0); for (let i = 0; i < 6; i++) b(['paper', 'yellow', 'white', 'orange', 'paper'][(R4() * 5) | 0], -w / 2 + .15 + (i % 3) * w * .32, y + (i < 3 ? .17 : -.16), .033, .22, .28, .005); }
+function poster(text, x, y, z, ry, bg) { signMesh(text, x, y, z, ry, .8, 1.05, { bg, size: .13, border: '#f6efe0' }); }
+function sofa(x, z, ry, w = 2.2) { const b = L(x, z, ry); b('blue', 0, .22, 0, w, .44, .9); b('blue', 0, .62, .38, w, .5, .18); for (const sx of [-1, 1]) b('blue', sx * (w / 2 - .1), .4, 0, .2, .55, .9); b('darksteel', 0, .1, 0, w - .1, .06, .8);
+  for (const k of [-1, 1]) Build.sit.push({ x: x + Math.cos(ry) * k * .5, z: z - Math.sin(ry) * k * .5, yaw: ry, y: .5, name: 'مبل' }); solidBox(x, z, w, .9, ry, 'sofa'); }
+function officeDesk(x, z, ry, w = 1.6, d = .8, top = 'laminate', monitor = true) {
+  const b = L(x, z, ry); b(top, 0, .74, 0, w, .05, d); for (const sx of [-1, 1]) b('darksteel', sx * (w / 2 - .04), .36, 0, .04, .72, d - .06); b('darksteel', 0, .55, d / 2 - .03, w - .1, .5, .03);
+  b('darksteel', w / 2 - .3, .5, 0, .5, .45, d - .1);
+  if (monitor) { b('black', 0, 1.0, -.1, .55, .34, .03); b('screen', 0, 1.0, -.083, .5, .3, .005); b('black', 0, .8, -.1, .12, .06, .1); b('black', .0, .77, .12, .42, .02, .14); b('white', .5, .79, -.1, .22, .04, .17); }
+  solidBox(x, z, w, d, ry, 'desk'); }
+function reception(x, z, ry) { const b = L(x, z, ry); b('blue', 0, .55, 0, 3.2, 1.1, .6); b('walnut', 0, 1.12, -.05, 3.3, .06, .8); b('white', 0, .3, -.31, 3.0, .5, .02); solidBox(x, z, 3.3, .8, ry, 'counter'); b('black', -.8, 1.4, .0, .5, .34, .03); b('screen', -.8, 1.4, .018, .46, .3, .005); b('black', -.8, 1.2, 0, .12, .12, .1); }
+function trophyCase(x, z, ry, w = 2.4) { const b = L(x, z, ry); b('walnut', 0, .45, 0, w, .9, .5); b('walnut', 0, 2.1, 0, w, .12, .5); b('walnut', 0, 1.5, .24, w, 1.3, .03); for (const sx of [-1, 1]) b('walnut', sx * w / 2, 1.5, 0, .04, 1.3, .5);
+  for (const lvl of [1.2, 1.65]) { b('glass', 0, lvl, 0, w - .06, .015, .46); for (let k = 0; k < 5; k++) { const tx = -w / 2 + .3 + k * (w - .6) / 4; b('gold', tx, lvl + .1, 0, .06, .18, .06); b('gold', tx, lvl + .22, 0, .14, .1, .14); b('gold', tx, lvl + .02, 0, .16, .03, .16); } }
+  b('glass', 0, 1.5, -.24, w - .04, 1.3, .01); solidBox(x, z, w, .5, ry, 'case'); }
+function lockers(x0, z0, x1, z1) { // along x at fixed z (facing -z or +z handled by caller via sign of depth)
+}
+function lockerRun(axis, fix, from, n, depthSign) { // modules of .8m; depth .5
+  for (let k = 0; k < n; k++) { const c = from + .4 + k * .8;
+    if (axis === 'x') { box('locker', c, .8, fix + depthSign * .25, .8, 1.6, .5); solid(c - .4, c + .4, fix + depthSign * .25 - .25, fix + depthSign * .25 + .25, 'locker'); }
+    else { box('locker', fix + depthSign * .25, .8, c, .5, 1.6, .8); solid(fix + depthSign * .25 - .25, fix + depthSign * .25 + .25, c - .4, c + .4, 'locker'); } } }
+
+/* ---- whiteboard with slide display and control strip ---- */
+function makeBoard(room, x, z, ry, sc = 1, cyOv) {
+  const b = L(x, z, ry), W = 4.0 * sc, Hh = 2.25 * sc, cy = cyOv || 1.75;
+  b('frame', 0, cy, .0, W + .16, Hh + .16, .04); b('darksteel', 0, cy - Hh / 2 - .08 - .13, .02, W + .16, .26, .09); b('steel', 0, cy - Hh / 2 - .27, .07, W + .16, .03, .06);
+  for (let k = 0; k < 3; k++) b(['red', 'blue', 'black'][k], -1.7 + k * .15, cy - Hh / 2 - .245, .09, .12, .02, .02);
+  const c = Math.cos(ry), s = Math.sin(ry), off = (lx, lz) => [x + lx * c + lz * s, z - lx * s + lz * c];
+  const tex0 = new THREE.CanvasTexture(textCanvas('بدون اسلاید', 1280, 720, { bg: '#f7f7f4', fg: '#9aa3ad', size: .09 })); tex0.encoding = THREE.sRGBEncoding;
+  const mat = new THREE.MeshBasicMaterial({ map: tex0, toneMapped: false });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(W, Hh), mat); const [bx, bz] = off(0, .025); mesh.position.set(bx, cy + YO, bz); mesh.rotation.y = ry; mesh.receiveShadow = true;
+  const cc = cnv(640, 100), cmat = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cc), toneMapped: false }); cmat.map.encoding = THREE.sRGBEncoding;
+  const ctrl = new THREE.Mesh(new THREE.PlaneGeometry(1.6, .25), cmat); const [px, pz] = off(1.0, .068); ctrl.position.set(px, cy - Hh / 2 - .21 + YO, pz); ctrl.rotation.y = ry;
+  const label = signMesh(room.name, ...(() => { const [lx, lz] = off(-1.3, .068); return [lx, cy - Hh / 2 - .21, lz]; })(), ry, 1.3, .2, { bg: '#2b3038', fg: '#e8edf3', size: .6, weight: 500 });
+  EXTRA_MESH.push(mesh, ctrl);
+  const board = { room, mesh, ctrl, cc, mat, idx: 0, slides: [], texCache: new Map(), blank: tex0, ry, x, z, W, Hh, cy, nx: -Math.sin(ry), nz: Math.cos(ry) };
+  BOARDS.push(board); drawCtrl(board); return board;
+}
+function drawCtrl(bd) {
+  const g = bd.cc.getContext('2d'), w = bd.cc.width, h = bd.cc.height, n = bd.slides.length; g.clearRect(0, 0, w, h);
+  g.fillStyle = '#20252c'; g.fillRect(0, 0, w, h); g.fillStyle = '#313843'; for (const x0 of [8, w - 168]) { g.beginPath(); g.roundRect ? g.roundRect(x0, 10, 160, h - 20, 14) : g.rect(x0, 10, 160, h - 20); g.fill(); }
+  g.fillStyle = n > 1 ? '#f1d27a' : '#6b7480'; g.font = '700 54px Vazirmatn, Tahoma, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.beginPath(); g.moveTo(98, h / 2 - 22); g.lineTo(98, h / 2 + 22); g.lineTo(68, h / 2); g.closePath(); g.fill();
+  g.beginPath(); g.moveTo(w - 98, h / 2 - 22); g.lineTo(w - 98, h / 2 + 22); g.lineTo(w - 68, h / 2); g.closePath(); g.fill();
+  g.fillStyle = '#fff'; g.font = '700 44px Vazirmatn, Tahoma, sans-serif'; g.fillText(n ? FA(bd.idx + 1) + ' از ' + FA(n) : 'بدون اسلاید', w / 2, h / 2 + 3);
+  bd.ctrl.material.map.needsUpdate = true;
+}
+function setBoardSlide(bd, i) {
+  const n = bd.slides.length; if (!n) { bd.mat.map = bd.blank; bd.mat.needsUpdate = true; drawCtrl(bd); return; }
+  bd.idx = (i % n + n) % n; const sl = bd.slides[bd.idx]; let t = bd.texCache.get(sl);
+  if (!t) { t = new THREE.CanvasTexture(sl.canvas); t.encoding = THREE.sRGBEncoding; t.anisotropy = ANISO; t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; bd.texCache.set(sl, t); }
+  bd.mat.map = t; bd.mat.needsUpdate = true; drawCtrl(bd); if (typeof onBoardChange === 'function') onBoardChange(bd);
+}
+
+/* ---- rooms ---- */
+function furnishClass(r, i) {
+  const R5 = rng(i * 77 + 5);
+  makeBoard(r, r.cx, SCH.zb + .12, 0);
+  clock(r.cx - 2.9, 3.0, SCH.zb + .15, 0);
+  for (const dx of [-2.8, 0, 2.8]) for (const rz of [-7.1, -5.8, -4.5]) {
+    studentDesk(r.cx + dx, rz); const cols = ['blue', 'orange', 'green', 'red'];
+    for (const sx of [-.3, .3]) chair(r.cx + dx + sx, rz + .62, 0, cols[(R5() * cols.length) | 0], { name: 'صندلی دانش‌آموز' });
+  }
+  officeDesk(r.cx + 3.2, -8.75, Math.PI, 1.5, .7, 'oak', true); swivel(r.cx + 3.2, -9.35, Math.PI, 'blue'); Build.sit[Build.sit.length - 1].name = 'صندلی معلم';
+  cabinet(r.x1 - .4, -3.9, Math.PI / 2, 1.6, 1.9, .5); bookcase(r.x0 + .3, -6.3, -Math.PI / 2, 1.8, 1.0, .3, { key: 'oak' });
+  box('white', r.x0 + .25, 2.75, -5.2, .22, .36, 1.1);
+  poster('جدول ضرب', r.x0 + .14, 1.9, -8.2, Math.PI / 2, ['#2e6f9e', '#3c8a5a', '#b4652f', '#6b4a8f', '#8f6a2f', '#4a5f78'][i]);
+  poster('فصل‌های سال', r.x1 - .14, 1.9, -8.0, -Math.PI / 2, ['#b4652f', '#2e6f9e', '#6b4a8f', '#3c8a5a', '#4a5f78', '#8f6a2f'][i]);
+  poster('قوانین کلاس', r.x1 - .14, 1.9, -6.7, -Math.PI / 2, '#3b4a63');
+  plant(r.x1 - .55, -9.5, 1.1); cyl('darksteel', r.x0 + .5, .22, -9.5, .17, .14, .44, 10); solid(r.x0 + .33, r.x0 + .67, -9.67, -9.33, 'bin');
+  for (const sx of [-3.4, 3.4]) for (const side of [-1, 1]) box(['yellow', 'orange', 'green', 'blue', 'red', 'white'][i], r.cx + sx + side * .85, 1.8, SCH.zb + .22, .26, 1.8, .06);
+  noticeBoard(r.x0 + .14, 1.7, -3.2, Math.PI / 2, .9, .7);
+}
+function furnishOffice(r) {
+  for (const x of [-25.6, -22.6]) for (const z of [4.9, 7.7]) { officeDesk(x, z, 0); swivel(x, z + .78, 0, 'darksteel'); }
+  for (let k = 0; k < 3; k++) cabinet(-27.62, 4.2 + k * .75, -Math.PI / 2, .7, 1.4, .5, 'darksteel');
+  cabinet(-19.2, 9.45, 0, 1.0, .9, .5, 'laminate'); box('white', -19.2, 1.0, 9.45, .5, .2, .4); box('black', -19.2, .95, 9.4, .4, .06, .3);
+  bookcase(-22.5, 9.7, 0, 2.2, 2.0, .35); bookcase(-25.2, 9.7, 0, 2.2, 2.0, .35);
+  noticeBoard(-18.14, 1.7, 7.0, -Math.PI / 2, 1.4, .9); plant(-27.4, 9.4); plant(-18.5, 3.1, .9); clock(-23.5, 2.85, 9.84, Math.PI);
+  poster('دفتر مدرسه', -27.87, 1.9, 3.3, Math.PI / 2, '#8f6a2f');
+}
+function furnishPrincipal(r) {
+  officeDesk(-13.2, 8.0, 0, 2.2, 1.0, 'walnut'); swivel(-13.2, 8.9, 0, 'black'); Build.sit[Build.sit.length - 1].name = 'صندلی مدیر';
+  chair(-14.2, 6.6, Math.PI, 'carpet'); chair(-12.2, 6.6, Math.PI, 'carpet'); box('gold', -13.2, .78, 8.45, .4, .04, .1); signMesh('مدیر مدرسه', -13.2, .85, 7.5 - 0.005, Math.PI, .4, .1, { bg: '#222', fg: '#e8c15a', size: .6 });
+  bookcase(-16.2, 9.7, 0, 3.2, 2.2, .4); bookcase(-9.9, 9.7, 0, 1.8, 2.2, .4);
+  bookcase(-17.7, 7.0, -Math.PI / 2 * 1, 2.6, 2.1, .38);
+  sofa(-17.0, 4.6, -Math.PI / 2, 2.0); box('walnut', -15.9, .38, 4.6, .6, .04, 1.1); for (const dz of [-.45, .45]) box('tableleg', -15.9, .19, 4.6 + dz, .04, .38, .04); solid(-16.25, -15.55, 4.0, 5.2, 'table');
+  cyl('steel', -9.5, 1.3, 9.3, .03, .03, 2.6, 8); box('flagG', -9.2, 2.2, 9.3, .6, .12, .02); box('flagW', -9.2, 2.08, 9.3, .6, .12, .02); box('flagR', -9.2, 1.96, 9.3, .6, .12, .02);
+  for (let k = 0; k < 3; k++) { box('oak', -13.2 + (k - 1) * .9, 2.2, 9.86, .5, .65, .03); box('paper', -13.2 + (k - 1) * .9, 2.2, 9.84, .42, .56, .01); }
+  plant(-17.4, 9.3, 1.2); plant(-8.5, 3.2, 1); clock(-10.5, 2.9, 9.84, Math.PI);
+}
+function furnishTeachers(r) {
+  box('walnut', 13, .72, 6.6, 4.6, .06, 1.3); for (const sx of [-2, 2]) for (const sz of [-.5, .5]) box('tableleg', 13 + sx, .36, 6.6 + sz, .08, .72, .08); solidBox(13, 6.6, 4.6, 1.3, 0, 'table');
+  for (const x of [11.4, 13, 14.6]) { chair(x, 5.55, Math.PI, 'orange', { name: 'صندلی معلمان' }); chair(x, 7.65, 0, 'orange', { name: 'صندلی معلمان' }); box('paper', x, .76, 6.2, .3, .02, .22); box('paper', x, .76, 7.0, .3, .02, .22); }
+  cyl('white', 13, .86, 6.6, .09, .1, .2, 10);
+  lockerRun('z', 17.88, 4.0, 6, -1);
+  box('laminate', 11.5, .45, 9.55, 3.2, .9, .6); box('walnut', 11.5, .92, 9.55, 3.3, .04, .66); solid(9.85, 13.15, 9.25, 9.85, 'counter');
+  cyl('steel', 10.6, 1.1, 9.55, .1, .12, .3, 10); cyl('white', 11.5, 1.05, 9.55, .08, .08, .2, 10); for (const dx of [0, .2, .4]) cyl('white', 12.3 + dx, .97, 9.55, .04, .035, .08, 8);
+  cabinet(9.9, 9.55, 0, .9, 1.9, .5, 'darksteel');
+  noticeBoard(8.14, 1.7, 5.5, Math.PI / 2, 1.5, .9); plant(17.4, 9.35); plant(8.6, 3.3, .9); clock(14.5, 2.85, 9.84, Math.PI);
+  poster('اتاق معلمان', 8.14, 1.9, 8.3, Math.PI / 2, '#3c8a5a');
+}
+function furnishLibrary(r) {
+  bookcase(20.6, 9.7, 0, 2.4, 2.4, .4); bookcase(23.1, 9.7, 0, 2.4, 2.4, .4); bookcase(25.6, 9.7, 0, 2.4, 2.4, .4); bookcase(27.7, 8.4, Math.PI / 2, 2.0, 2.4, .4); bookcase(27.7, 6.2, Math.PI / 2, 2.0, 2.4, .4);
+  bookcase(23.6, 5.17, Math.PI, 3.6, 1.9, .35); bookcase(23.6, 4.83, 0, 3.6, 1.9, .35);
+  for (const tx of [20.9, 25.5]) { box('oak', tx, .74, 7.4, 1.8, .05, .9); for (const sx of [-.8, .8]) for (const sz of [-.35, .35]) box('tableleg', tx + sx, .36, 7.4 + sz, .05, .72, .05); solidBox(tx, 7.4, 1.8, .9, 0, 'table');
+    chair(tx - .45, 6.55, Math.PI, 'green'); chair(tx + .45, 6.55, Math.PI, 'green'); chair(tx - .45, 8.25, 0, 'green'); chair(tx + .45, 8.25, 0, 'green'); box('book2', tx - .3, .78, 7.4, .2, .03, .28, .3); box('book1', tx + .4, .78, 7.3, .2, .03, .28, -.2); }
+  cyl('darksteel', 25.5, .84, 7.4, .02, .02, .2, 6); sph('blue', 25.5, 1.02, 7.4, .17); // globe
+  officeDesk(26.2, 3.5, 0, 1.5, .7, 'walnut'); swivel(26.2, 4.25, 0, 'darksteel');
+  for (const [x, z] of [[19.0, 6.0], [19.0, 7.4]]) { sph('red', x, .3, z, .5, 1, .6, 1, 10); Build.sit.push({ x, z, yaw: -Math.PI / 2, y: .35, name: 'پشتی' }); solid(x - .4, x + .4, z - .4, z + .4, 'bean'); }
+  signMesh('کتابخانه', 23.1, 2.75, 9.83, Math.PI, 2.4, .5, { bg: '#4a2f55', border: '#e8c15a' }); plant(18.6, 9.35, 1.1); plant(27.4, 3.1, 1); clock(18.14, 2.9, 5.0, Math.PI / 2);
+  poster('کتاب بخوانیم', 18.14, 1.9, 3.7, Math.PI / 2, '#6b4a8f');
+}
+function furnishLobby(r) {
+  reception(4.6, 8.7, 0); box('gold', 4.6, 1.4, 8.35, .8, .18, .03); swivel(4.6, 9.4, 0, 'black'); Build.sit[Build.sit.length - 1].name = 'صندلی پذیرش';
+  trophyCase(7.55, 5.0, Math.PI / 2, 2.6); trophyCase(7.55, 7.7, Math.PI / 2, 2.0);
+  bench(-7.2, 4.0, -Math.PI / 2); bench(-7.2, 5.7, -Math.PI / 2);
+  for (const [x, z] of [[-7.4, 9.4], [7.4, 9.4], [-7.4, 3.0], [7.4, 3.0]]) plant(x, z, 1.1);
+  for (const sx of [-2.4, 2.4]) { cyl('steel', sx, 1.3, 9.2, .03, .03, 2.6, 8); box('flagG', sx + .32, 2.2, 9.2, .6, .13, .02); box('flagW', sx + .32, 2.07, 9.2, .6, .13, .02); box('flagR', sx + .32, 1.94, 9.2, .6, .13, .02); box('darksteel', sx, .04, 9.2, .5, .08, .5); }
+  signMesh('تابلوی اعلانات', -7.86, 2.5, 8.0, Math.PI / 2, 1.6, .3, { bg: '#16365f', border: '#e8c15a' }); noticeBoard(-7.86, 1.6, 8.0, Math.PI / 2, 1.6, 1.0);
+  signMesh('درود، به مدرسه ما خوش آمدید', 0, 2.95, 2.62, 0, 4.2, .45, { bg: '#16365f', fg: '#f4e9c4', border: '#e8c15a' }); clock(-4.0, 2.7, 2.62, 0);
+  box('carpet', 0, .02, 6.0, 5.0, .02, 3.0);
+}
+function furnishCorridor() {
+  const { c0, c1 } = SCH;
+  for (let i = 0; i < CLASS_N; i++) { const r = ROOMS[i]; const start = Math.ceil((r.x0 + 2.35) / .8) * .8; lockerRun('x', c0 + .12, start, 2, 1); noticeBoard(r.x0 + 8.2, 1.7, c0 + .14, 0, 1.0, .75); if (i % 2 === 0) poster('کتابخوانی', r.x0 + 3.0, 1.9, c0 + .14, 0, ['#3c8a5a', '#2e6f9e', '#b4652f'][i / 2]); }
+  for (const x of [-24, -14.5, 14.5, 25]) bench(x, c1 - .45, 0);
+  for (const x of [-12.5, 12.5]) { cyl('red', x, .5, c1 - .22, .1, .1, .5, 10); box('white', x, 1.0, c1 - .14, .2, .02, .02); }
+  box('steel', -26.6, .5, c1 - .3, .5, 1.0, .35); box('blue', -26.6, 1.15, c1 - .3, .45, .3, .3); solid(-26.9, -26.3, c1 - .5, c1 - .1, 'fountain');
+  for (const [x, z] of [[-26.8, 0], [26.8, 0]]) plant(x, z, 1.4);
+  for (const x of [-6, 6]) clock(x, 2.8, c0 + .14, 0);
+  for (const x of [-16, 16, -2.2, 2.2]) { cyl('darksteel', x, .3, c0 + .35, .15, .13, .6, 10); solid(x - .16, x + .16, c0 + .19, c0 + .51, 'bin'); }
+}
+function buildFurnishing() { for (let i = 0; i < CLASS_N; i++) furnishClass(ROOMS[i], i); furnishOffice(RM('office')); furnishPrincipal(RM('principal')); furnishTeachers(RM('teachers')); furnishLibrary(RM('library')); furnishLobby(RM('lobby')); furnishCorridor(); }
+
+/* ===== Map 2: Allameh Amini school, two floors (layout from the supplied sketches and photos) ===== */
+const AMF = f => -40 + 80 * f, AMW = 'wallAm', AMCZ = 2.5, AMZ = { N: [-11, -AMCZ], P: [-19.5, -11], S: [AMCZ, 11] };
+const AM_BS = { c1: 'x0', c2: 'x0', c3: 'x1', c4: 'x1', c5: 'x1', c6: 'x1', c7: 'x1', c8: 'x0', c9: 'x1', c10: 'x1', c11: 'x0' }; // wall that carries the blackboard
+const STP = { off: 7.0, FL: 4.0, N: 10, RH: .185, FW: 2.0, VW: 2.7 };
+const AMR = {
+  2: [['c1', 'کلاس ۱', 'class', .79, 1, 'S'], ['c2', 'کلاس ۲', 'class', .58, .79, 'S'], ['c3', 'کلاس ۳', 'class', .18, .38, 'S'], ['c4', 'کلاس ۴', 'class', 0, .18, 'S'], ['c5', 'کلاس ۵', 'class', 0, .18, 'N'], ['c6', 'کلاس ۶', 'class', .18, .4, 'N'], ['c7', 'کلاس ۷', 'class', .33, .5, 'P', .45], ['c8', 'کلاس ۸', 'class', .5, .7, 'P', .55],
+    ['st2', 'راه‌پله', 'stairs', .58, .75, 'N'], ['pc', 'اتاق کامپیوتر', 'comp', .75, 1, 'N'], ['dep', 'اتاق معاون', 'office', .38, .58, 'S']],
+  1: [['c9', 'کلاس ۹', 'class', .17, .4, 'N'], ['c10', 'کلاس ۱۰', 'class', .33, .5, 'P', .45], ['c11', 'کلاس ۱۱', 'class', .5, .7, 'P', .55],
+    ['t8', 'اتاق معلمان', 'teachers', 0, .17, 'N'], ['st1', 'آبدارخانه و راه‌پله', 'stairs', .58, .75, 'N'], ['lab', 'آزمایشگاه', 'lab', .75, 1, 'N'],
+    ['chg', 'رختکن و ورزش کوچک', 'gym', 0, .16, 'S'], ['dp', 'معاون پرورشی', 'office', .16, .38, 'S'], ['ent', 'ورودی مدرسه', 'lobby', .38, .58, 'S'], ['cn', 'اتاق مشاور', 'office', .58, .71, 'S'], ['ex', 'معاون اجرایی', 'office', .71, .85, 'S'], ['pr', 'دفتر مدیر', 'office', .85, 1, 'S']]
+};
+const AM_NAMES = ['۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸'].map(n => 'کلاس ' + n + ' (طبقه دوم)').concat(['۹', '۱۰', '۱۱'].map(n => 'کلاس ' + n + ' (طبقه اول)'));
+const SCH_NAMES = CLASS_NAMES.slice();
+function amRooms(lv) {
+  const sfx = lv === 2 ? ' — طبقه دوم' : ' — طبقه اول';
+  const out = AMR[lv].map(([id, sn, type, f0, f1, row, df]) => ({ id, sn, name: sn + sfx, type, row, df, lv, x0: AMF(f0), x1: AMF(f1), z0: AMZ[row][0], z1: AMZ[row][1], wk: AMW, fk: type === 'stairs' ? 'chkSq' : 'chk', bs: AM_BS[id], lbl: type === 'class' ? FA(+id.slice(1)) : '' }));
+  out.push({ id: 'cor' + lv, sn: 'راهرو', name: 'راهرو' + sfx, type: 'cor', lv, x0: AMF(0), x1: AMF(1), z0: -AMCZ, z1: AMCZ, wk: AMW, fk: 'chk' }, { id: 'hall' + lv, sn: 'هال', name: 'هال' + sfx, type: 'hall', lv, x0: AMF(.4), x1: AMF(.58), z0: AMZ.N[0], z1: AMZ.N[1], wk: AMW, fk: 'chk' });
+  for (const r of out) { r.cx = (r.x0 + r.x1) / 2; r.cz = (r.z0 + r.z1) / 2; } return out;
+}
+function tbl(x, z, w, d, h = .74, key = 'walnut') { box(key, x, h, z, w, .06, d); for (const a of [-1, 1]) for (const b of [-1, 1]) box('tableleg', x + a * (w / 2 - .1), h / 2, z + b * (d / 2 - .1), .06, h, .06); solidBox(x, z, w, d, 0, 'table'); }
+function amFurnish(r) {
+  const cx = r.cx, cz = r.cz, z0 = r.z0;
+  if (r.type === 'class') {
+    // the blackboard sits on a SIDE wall (bs); desks, chairs and everything else face it, so on entering the room they are to the left / right
+    const bs = r.bs, sg = bs === 'x1' ? -1 : 1, xb = bs === 'x1' ? r.x1 : r.x0, yw = bs === 'x1' ? -Math.PI / 2 : Math.PI / 2;
+    const Wp = (u, v) => [xb + sg * u, cz + (bs === 'x1' ? v : -v)];          // u: distance from the board wall, v: sideways
+    const Lz = r.x1 - r.x0, Wd = r.z1 - r.z0, id = +r.id.slice(1), R5 = rng(id * 77 + 5), cols = ['blue', 'orange', 'green', 'red'];
+    const ud = Math.abs(amDoorX(r) - xb), dv = (((r.row === 'S' ? r.z0 : r.z1) - cz) < 0 ? -1 : 1) * (bs === 'x1' ? 1 : -1);
+    { const [bx, bz] = Wp(.12, 0); makeBoard(r, bx, bz, yw, 1.15, 1.85); }
+    { const [x, z] = Wp(.15, -3.3); clock(x, 3.05, z, yw); }
+    const nr = Math.max(3, Math.min(8, Math.floor((Lz - 6) / 1.5) + 1)), nc = Wd >= 8 ? 3 : 2;
+    for (let a = 0; a < nc; a++) for (let k = 0; k < nr; k++) { const v = (a - (nc - 1) / 2) * 2.7, u = 3.2 + k * 1.5; const [x, z] = Wp(u, v); studentDesk(x, z, yw);
+      for (const sx of [-.3, .3]) { const [qx, qz] = Wp(u + .62, v + sx); chair(qx, qz, yw, cols[(R5() * 4) | 0], { name: 'صندلی دانش‌آموز' }); } }
+    { const [x, z] = Wp(1.5, 3.0); officeDesk(x, z, yw + Math.PI, 1.5, .7, 'oak', true); const [sx2, sz2] = Wp(.8, 3.0); swivel(sx2, sz2, yw + Math.PI, 'blue'); Build.sit[Build.sit.length - 1].name = 'صندلی معلم'; }
+    { const [x, z] = Wp(.3, -3.4); cabinet(x, z, yw + Math.PI, 1.6, 1.9, .5); }
+    { const [x, z] = Wp(Lz - .3, 0); bookcase(x, z, yw, 1.8, 1.0, .3, { key: 'oak' }); }
+    { const [x, z] = Wp(Lz - .55, -dv * (Wd / 2 - .55)); plant(x, z, 1.1); }
+    const wz = r.row === 'S' ? r.z0 : r.z1, wd = r.row === 'S' ? 1 : -1, wry = wd > 0 ? 0 : Math.PI, okU = u => Math.abs(u - ud) > 1.8, ax = u => Wp(u, 0)[0];
+    const pal = ['#2e6f9e', '#3c8a5a', '#b4652f', '#6b4a8f', '#8f6a2f', '#4a5f78'];
+    if (okU(3.2)) poster('جدول ضرب', ax(3.2), 1.9, wz + wd * .14, wry, pal[id % 6]);
+    if (okU(5.0)) poster('فصل‌های سال', ax(5.0), 1.9, wz + wd * .14, wry, pal[(id + 2) % 6]);
+    if (okU(7.4)) noticeBoard(ax(7.4), 1.7, wz + wd * .14, wry, 1.2, .8);
+    if (okU(9.8)) poster('قوانین کلاس', ax(9.8), 1.9, wz + wd * .14, wry, '#3b4a63');
+  } else if (r.type === 'office') {
+    officeDesk(cx, cz, 0, 1.9, .9, 'walnut'); swivel(cx, cz + .9, 0, 'black'); chair(cx - .7, cz - .9, Math.PI, 'carpet'); chair(cx + .7, cz - .9, Math.PI, 'carpet');
+    bookcase(r.x0 + .35, cz, -Math.PI / 2, 2.4, 2.1, .38); plant(r.x1 - .6, r.z1 - .6); noticeBoard(r.x1 - .14, 1.7, cz, -Math.PI / 2, 1.2, .8);
+  } else if (r.type === 'teachers') {
+    const nch = Math.max(3, Math.min(5, Math.floor((r.x1 - r.x0 - 4) / 1.6))); tbl(cx, cz, nch * 1.6 - .2, 1.5, .72); for (let i = 0; i < nch; i++) { const x = cx + (i - (nch - 1) / 2) * 1.6; chair(x, cz - 1.15, Math.PI, 'orange', { name: 'صندلی معلمان' }); chair(x, cz + 1.15, 0, 'orange', { name: 'صندلی معلمان' }); }
+    cabinet(r.x1 - .4, cz, Math.PI / 2, 2.4, 1.9, .5); bookcase(r.x0 + .35, cz, -Math.PI / 2, 2.6, 2.1, .38); plant(r.x1 - .6, r.z1 - .6);
+  } else if (r.type === 'lab') {
+    for (const tx of [cx - 5, cx + 5]) for (const tz of [cz - 2, cz + 2]) { tbl(tx, tz, 6, 1, .9, 'laminate'); for (const sx of [-2, 0, 2]) { chair(tx + sx, tz - .95, Math.PI, 'darksteel', { name: 'چهارپایه' }); chair(tx + sx, tz + .95, 0, 'darksteel', { name: 'چهارپایه' }); } }
+    cabinet(r.x1 - .4, cz, Math.PI / 2, 2.6, 1.9, .5); cabinet(r.x0 + .4, cz, -Math.PI / 2, 2.6, 1.9, .5);
+  } else if (r.type === 'comp') {
+    { const cn = Math.max(4, Math.floor((r.x1 - r.x0 - 2) / 3.2)); for (let k = 0; k < 4; k++) for (let a = 0; a < cn; a++) { const dx = (a - (cn - 1) / 2) * 3.2, dz = 1.6 + k * 1.75; officeDesk(cx + dx, z0 + dz, 0, 1.4, .7, 'laminate', true); swivel(cx + dx, z0 + dz + .78, 0, 'darksteel'); } }
+  } else if (r.type === 'gym') {
+    box('blue', cx, .76, cz, 2.74, .05, 1.53); for (const a of [-1, 1]) for (const b of [-1, 1]) box('tableleg', cx + a * 1.2, .38, cz + b * .6, .06, .76, .06); box('white', cx, .86, cz, .02, .15, 1.6); solidBox(cx, cz, 2.8, 1.6, 0, 'table');
+    bench(r.x0 + .5, cz + 1.8, -Math.PI / 2); plant(r.x1 - .6, r.z1 - .6);
+  } else if (r.type === 'stairs') {
+    if (LV === 1) { box('laminate', r.x0 + 1.8, .45, z0 + .55, 2.8, .9, .6); box('walnut', r.x0 + 1.8, .92, z0 + .55, 2.9, .04, .66); solid(r.x0 + .4, r.x0 + 3.2, z0 + .25, z0 + .85, 'counter'); cyl('steel', r.x0 + 1.2, 1.1, z0 + .55, .1, .12, .3, 10); cabinet(r.x0 + .45, z0 + 3, -Math.PI / 2, 1.6, 1.9, .5); }
+    else { plant(r.x0 + .6, r.z1 - .6, 1.2); noticeBoard(r.x0 + .14, 1.7, r.cz, Math.PI / 2, 1.2, .8); }
+  } else if (r.type === 'lobby') {
+    bench(r.x0 + .6, cz, -Math.PI / 2); bench(r.x1 - .6, cz, Math.PI / 2); plant(r.x0 + .6, r.z1 - .8, 1.2); plant(r.x1 - .6, r.z1 - .8, 1.2); noticeBoard(r.x0 + .14, 1.7, cz + 2, Math.PI / 2, 1.6, 1);
+    signMesh('به مدرسه علامه امینی خوش آمدید', cx, 3.0, r.z1 - .15, Math.PI, 5.2, .5, { bg: '#16365f', fg: '#f4e9c4', border: '#e8c15a' });
+  }
+}
+const amDoorX = r => r.row === 'P' ? AMF(r.df) : (r.bs === 'x0' ? r.x1 - 1.4 : r.x0 + 1.4);
+function stairGeo(st) { const zb = st.z0 + .12, BZ1 = zb + STP.FW, AZ0 = BZ1 + STP.VW; return { zb, SX: st.x1 - STP.off, x1w: st.x1 - .12, BZ1, AZ0, AZ1: AZ0 + STP.FW }; }
+// straight hand rail with balusters between two points on the floor plane (y0 = floor height)
+function railLine(x0, z0, x1, z1, y0, o = {}) {
+  const len = Math.hypot(x1 - x0, z1 - z0), ry = Math.atan2(-(z1 - z0), x1 - x0), hy = o.h || .92;
+  box('rail', (x0 + x1) / 2, y0 + hy, (z0 + z1) / 2, len, .06, .06, ry);
+  const n = Math.max(1, Math.round(len / .13)); for (let i = 1; i < n; i++) { const t = i / n; box('rail', x0 + (x1 - x0) * t, y0 + hy / 2 - .02, z0 + (z1 - z0) * t, .03, hy - .06, .03); }
+  for (const [x, z] of [[x0, z0], [x1, z1]]) box('rail', x, y0 + hy / 2 + .02, z, .09, hy + .04, .09);
+}
+function railSlope(x0, y0, x1, y1, z) { const dx = x1 - x0, dy = y1 - y0; put(xf(new THREE.BoxGeometry(Math.hypot(dx, dy), .06, .06), (x0 + x1) / 2, (y0 + y1) / 2, z, 0, 0, Math.atan2(dy, dx)), 'rail'); }
+function stairPlant(x, z, kind, s = 1) {
+  const Rr = rng((x * 53 + z * 31) | 0); let top = .4 * s;
+  if (kind === 'tree') { cyl('white', x, .2 * s, z, .26 * s, .26 * s, .4 * s, 12); cyl('blackpot', x, .4 * s + .17 * s, z, .22 * s, .17 * s, .34 * s, 12); cyl('trunk', x, 1.3 * s, z, .035 * s, .05 * s, 1.1 * s, 6);
+    for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; sph('leaf', x + Math.cos(a) * .3 * s, 1.85 * s + (k % 2) * .12, z + Math.sin(a) * .3 * s, .3 * s, 1.1, .34, 1.1, 7); } sph('leafDark', x, 2.0 * s, z, .34 * s, 1.1, .4, 1.1, 7); return; }
+  cyl('blackpot', x, .2 * s, z, .24 * s, .18 * s, .4 * s, 12);
+  if (kind === 'roses') { for (let k = 0; k < 5; k++) sph(k % 2 ? 'leaf' : 'leafDark', x + (Rr() - .5) * .35 * s, (.55 + Rr() * .25) * s, z + (Rr() - .5) * .35 * s, .2 * s, 1.1, .8, 1.1, 7);
+    for (let k = 0; k < 8; k++) sph(k % 3 ? 'rose' : 'pink', x + (Rr() - .5) * .45 * s, (.7 + Rr() * .35) * s, z + (Rr() - .5) * .45 * s, .065 * s, 1, 1, 1, 6); return; }
+  for (let k = 0; k < 9; k++) { const a = k * 2.4, rr = (.1 + Rr() * .3) * s; sph(Rr() > .5 ? 'leaf' : 'leafDark', x + Math.cos(a) * rr, (.55 + Rr() * .6) * s, z + Math.sin(a) * rr, .24 * s, 1.25, .45, 1.05, 7); }
+  for (let k = 0; k < 5; k++) sph('berry', x + (Rr() - .5) * .55 * s, (.8 + Rr() * .5) * s, z + (Rr() - .5) * .55 * s, .035 * s, 1, 1, 1, 5);
+}
+function amGarden(G) { const cz = (G.BZ1 + G.AZ0) / 2, SX = G.SX, w = STP.FL;
+  plane('artgrass', SX + w / 2, .022, cz, w - .02, G.AZ0 - G.BZ1 - .02, 0, -Math.PI / 2);
+  stairPlant(SX + 3.25, cz + .1, 'tree', 1.1); stairPlant(SX + .75, cz - .7, 'bush', 1.1); stairPlant(SX + 1.9, cz + .5, 'bush', 1.3); stairPlant(SX + 2.7, cz - .75, 'bush', .95);
+  stairPlant(SX + .85, cz + .75, 'roses', 1); stairPlant(SX + 3.4, cz + .85, 'roses', .9); stairPlant(SX + 1.5, cz - .85, 'roses', .85); }
+// brown marble dado with a white moulding on top, like the real stairwell
+function amWainscot(r, doorX) {
+  const t = .03, x0 = r.x0 + .12, x1 = r.x1 - .12, z0 = r.z0 + .12, z1 = r.z1 - .12;
+  const sx = (xa, xb, z, dz) => { if (xb - xa < .05) return; box('marbleBr', (xa + xb) / 2, .45, z + dz * t / 2, xb - xa, .9, t); box('white', (xa + xb) / 2, .94, z + dz * .03, xb - xa, .08, .06); };
+  const sz = (za, zb, x, dx) => { box('marbleBr', x + dx * t / 2, .45, (za + zb) / 2, t, .9, zb - za); box('white', x + dx * .03, .94, (za + zb) / 2, .06, .08, zb - za); };
+  sx(x0, x1, z0, 1); sx(x0, doorX - .55, z1, -1); sx(doorX + .55, x1, z1, -1); sz(z0, z1, x0, 1); sz(z0, z1, x1, -1);
+}
+// upper floor: railing around the stairwell opening
+function amUpper(st) { const G = stairGeo(st), l0 = LV; railLine(G.SX, G.BZ1, G.SX, G.AZ1, 0); railLine(G.SX, G.AZ1, G.x1w, G.AZ1, 0); LV = 2; solid(G.SX - .05, G.SX + .05, G.BZ1, G.AZ1 + .05, 'rail'); LV = l0; }
+// U-shaped (switch-back) marble stair with a landing, a central well with plants, white balustrades
+function amStairs(st) {
+  const G = stairGeo(st), { zb, SX, x1w, BZ1, AZ0, AZ1 } = G, FL = STP.FL, N = STP.N, RH = STP.RH, FW = STP.FW, TD = FL / N, hy = .92, l0 = LV; LV = 0;
+  const zA = (AZ0 + AZ1) / 2, zB = (zb + BZ1) / 2, lx0 = SX + FL, H1 = RH * N, H2 = 2 * H1;
+  const stripe = (x, h, z) => box('stripe', x, h + .004, z, .045, .009, FW - .08);
+  for (let i = 0; i < N; i++) { const h = (i + 1) * RH, hb = H1 + h;
+    box('marbleS', SX + (i + .5) * TD, h / 2, zA, TD, h, FW); stripe(SX + i * TD + .04, h, zA);
+    box('marbleS', lx0 - (i + .5) * TD, hb / 2, zB, TD, hb, FW); stripe(lx0 - i * TD - .04, hb, zB); }
+  const lw = x1w - lx0, lzc = (zb + AZ1) / 2;
+  box('plaster', lx0 + lw / 2, (H1 - .05) / 2, lzc, lw, H1 - .05, AZ1 - zb); box('chkSq', lx0 + lw / 2, H1 - .025, lzc, lw, .05, AZ1 - zb);
+  // flight A (east) rails, both sides
+  for (const z of [AZ0 + .03, AZ1 - .03]) {
+    railSlope(SX, RH + hy, SX + FL - TD, H1 + hy, z); box('rail', SX + FL - TD / 2, H1 + hy, z, TD, .06, .06);
+    for (let i = 0; i < N; i++) for (let k = 0; k < 3; k++) { const x = SX + i * TD + (k + .5) * TD / 3, base = (i + 1) * RH, top = (i < N - 1 ? RH + hy + (x - SX) * (RH / TD) : H1 + hy) - .03; box('rail', x, (base + top) / 2, z, .03, top - base, .03); }
+    box('rail', SX + .03, (RH + hy + .08) / 2, z, .09, RH + hy + .08, .09); box('rail', lx0 - .03, (H1 + hy + .08) / 2, z, .09, H1 + hy + .08, .09); }
+  // flight B (back, returns west) – rail on the well side
+  { const z = BZ1 - .03;
+    railSlope(lx0, H1 + RH + hy, SX + TD, H2 + hy, z); box('rail', SX + TD / 2, H2 + hy, z, TD, .06, .06);
+    for (let j = 0; j < N; j++) for (let k = 0; k < 3; k++) { const x = lx0 - j * TD - (k + .5) * TD / 3, base = H1 + (j + 1) * RH, top = (j < N - 1 ? H1 + RH + hy + (lx0 - x) * (RH / TD) : H2 + hy) - .03; box('rail', x, (base + top) / 2, z, .03, top - base, .03); }
+    box('rail', lx0 - .03, (H1 + RH + hy + .08) / 2, z, .09, H1 + RH + hy + .08, .09); box('rail', SX + .03, (H2 + hy + .08) / 2, z, .09, H2 + hy + .08, .09); }
+  railLine(lx0 + .03, BZ1, lx0 + .03, AZ0, H1);        // landing, well side
+  railLine(lx0, AZ1 - .03, x1w, AZ1 - .03, H1);        // landing, walkway side
+  railLine(SX, BZ1 + .05, SX, AZ0 - .05, 0, { h: .55 }); // low fence in front of the garden
+  amGarden(G);
+  poster('طبیعت ایران', SX - 2.2, 1.9, zb + .03, 0, '#2e6f9e');
+  const sd = (x0, x1, z0, z1, hyc) => solid(x0, x1, z0, z1, 'rail', hyc);
+  sd(SX, SX + FL, AZ0 - .05, AZ0 + .08); sd(SX, x1w, AZ1 - .08, AZ1 + .05); sd(SX, SX + FL, BZ1 - .08, BZ1 + .05); sd(lx0 - .05, lx0 + .08, BZ1, AZ0); sd(SX - .05, SX + .05, BZ1, AZ0);
+  solid(lx0, x1w, zb, AZ1, 'mass', 1.5); solid(SX, SX + FL, zb, BZ1, 'mass', 1.5);
+  Build.ramps.push({ minx: SX, maxx: lx0, minz: AZ0, maxz: AZ1, ax: 'x', a: SX, b: lx0, y0: 0, y1: H1 }, { minx: lx0, maxx: x1w, minz: zb, maxz: AZ1, ax: 'z', a: 0, b: 1, y0: H1, y1: H1 }, { minx: SX, maxx: lx0, minz: zb, maxz: BZ1, ax: 'x', a: lx0, b: SX, y0: H1, y1: H2 });
+  LV = l0;
+}
+// glass partition like the real deputy office: brown marble dado, white aluminium frames, glass above, white glazed door
+function amGlassWall(f, a, b, dc, dw, wkN, wkP, door) {
+  const H = SCH.H, T = .24, hh = T / 2, Y0 = .96, Y1 = 2.75, FR = .05, X0 = dc - dw / 2, X1 = dc + dw / 2;
+  for (const [s0, s1] of [[a, X0], [X1, b]]) { const L = s1 - s0, m = (s0 + s1) / 2; if (L < .05) continue;
+    box('marbleBr', m, .45, f - hh + .03, L, .9, .06); box('marbleBr', m, .45, f + hh - .03, L, .9, .06); box('plaster', m, Y0 / 2, f, L, Y0, T - .12);
+    box('white', m, .93, f, L, .06, T + .06);
+    box('white', m, Y0 + FR / 2, f, L, FR, .1); box('white', m, Y1 - FR / 2, f, L, FR, .1); box('white', m, 1.9, f, L, FR, .1);
+    const n = Math.max(1, Math.round(L / 2.2)), pw = L / n; for (let i = 0; i <= n; i++) box('white', s0 + i * pw, (Y0 + Y1) / 2, f, .06, Y1 - Y0, .1);
+    plane('glass', m, (Y0 + Y1) / 2, f, L, Y1 - Y0, 0);
+    solid(s0, s1, f - hh, f + hh, 'wall'); }
+  // glass transom above the door and white jambs
+  plane('glass', dc, (2.15 + Y1) / 2, f, dw, Y1 - 2.15, 0); box('white', dc, 2.15 + FR / 2, f, dw, FR, .1); box('white', dc, Y1 - FR / 2, f, dw, FR, .1);
+  for (const x of [X0 + .03, X1 - .03]) box('white', x, 1.075, f, .06, 2.15, T + .04);
+  // solid wall strip above the glass up to the ceiling
+  const yh = (Y1 + H) / 2, hy = H - Y1; box(wkN, (a + b) / 2, yh, f - hh / 2, b - a, hy, hh); box(wkP, (a + b) / 2, yh, f + hh / 2, b - a, hy, hh);
+  // white door leaf with glass pane (open, like the other doors)
+  if (door && !door.noLeaf) { const hinge = door.hinge || 1, lw = dw - .1, hc = hinge < 0 ? X0 + .04 : X1 - .04, zc = f + (door.into || 1) * (hh + .03 + lw / 2);
+    box('white', hc, 1.04, zc, .045, 2.07, lw); box('glass', hc, 1.55, zc, .06, .85, lw - .3); box('steel', hc, 1.0, zc, .08, .05, .05); }
+}
+function amFloor(lv) {
+  LV = lv; YO = lv === 2 ? 3.7 : 0; const H = SCH.H, rs = amRooms(lv); ROOMS.push(...rs); const s0 = Build.sit.length;
+  const E0 = AMF(.38), E1 = AMF(.58), st = rs.find(r => r.type === 'stairs'), hole = (() => { const G = stairGeo(st); return { x0: G.SX, x1: st.x1, z0: st.z0, z1: G.AZ1 }; })();
+  const sub = (r, hl, fn) => { const q = (a, b, c, d) => { if (b - a > .01 && d - c > .01) fn((a + b) / 2, (c + d) / 2, b - a, d - c); }; if (!hl) return q(r.x0, r.x1, r.z0, r.z1); q(r.x0, r.x1, r.z0, hl.z0); q(r.x0, r.x1, hl.z1, r.z1); q(r.x0, hl.x0, hl.z0, hl.z1); q(hl.x1, r.x1, hl.z0, hl.z1); };
+  for (const r of rs) {
+    sub(r, lv === 2 && r === st ? hole : null, (x, z, w, d) => plane(r.fk, x, .012, z, w, d, 0, -Math.PI / 2));
+    sub(r, lv === 1 && r === st ? hole : null, (x, z, w, d) => { plane('ceiling', x, H - .005, z, w, d, 0, Math.PI / 2); box('concrete', x, H + .15, z, w, .3, d); });
+  }
+  const D = [], dr = (f, c, w, o) => D.push({ f, c, o: Object.assign({ c, w, y0: 0, y1: 2.15, t: 'door' }, o) });
+  for (const r of rs) { if (r.type === 'cor' || r.type === 'hall') continue;
+    if (r.type === 'lobby') dr(r.z1, r.cx, 3.8, { noLeaf: 1, y1: 2.7 });
+    else if (r.row === 'N') dr(r.z1, amDoorX(r), 1, { hinge: r.bs === 'x0' ? 1 : -1, into: -1 });
+    else if (r.row === 'S') dr(r.z0, amDoorX(r), 1, { hinge: r.bs === 'x0' ? -1 : 1, into: 1 });
+    else dr(r.z1, amDoorX(r), 1, { hinge: -1, into: -1 });
+    if (r.id === 'dep') dr(r.z1, r.cx, 1.6, { noLeaf: 1 }); }
+  const E = { x: {}, z: {} };
+  for (const r of rs) for (const [ax, f, a, b] of [['x', r.z0, r.x0, r.x1], ['x', r.z1, r.x0, r.x1], ['z', r.x0, r.z0, r.z1], ['z', r.x1, r.z0, r.z1]]) { const k = f.toFixed(2); (E[ax][k] = E[ax][k] || { f, p: [] }).p.push([a, b]); }
+  const at = (ax, f, m, d) => rs.find(r => ax === 'x' ? m > r.x0 && m < r.x1 && f + d > r.z0 && f + d < r.z1 : m > r.z0 && m < r.z1 && f + d > r.x0 && f + d < r.x1), OPEN = ['cor', 'hall', 'lobby'];
+  for (const ax of ['x', 'z']) for (const k in E[ax]) { const { f, p } = E[ax][k], pts = [...new Set(p.flat().map(v => +v.toFixed(2)))].sort((u, v) => u - v);
+    for (let i = 0; i < pts.length - 1; i++) { const a = pts[i], b = pts[i + 1], m = (a + b) / 2; if (!p.some(([s, e]) => s <= m && e >= m)) continue;
+      const n = at(ax, f, m, -.3), q = at(ax, f, m, .3); if (n && q && OPEN.includes(n.type) && OPEN.includes(q.type)) continue;
+      const ops = D.filter(d => ax === 'x' && Math.abs(d.f - f) < .01 && d.c > a + .5 && d.c < b - .5).map(d => d.o);
+      if (!n || !q) { const len = b - a, c0 = Math.floor(len / 3.6) || (len > 2.4 ? 1 : 0); for (let j = 0; j < c0; j++) { const c = a + len * (j + .5) / c0; if (!D.some(d => ax === 'x' && Math.abs(d.f - f) < .01 && Math.abs(d.c - c) < 2.2)) ops.push({ c, w: 1.6, y0: 1, y1: 2.6, t: 'win' }); } }
+      if (lv === 2 && ax === 'x' && n && q && q.id === 'dep' && Math.abs(f - AMCZ) < .01) { const dd = ops.find(o => o.t === 'door'); amGlassWall(f, a, b, dd ? dd.c : (a + b) / 2, dd ? dd.w : 1, n.wk, q.wk, dd); continue; }
+      wall(ax, f, a, b, n ? n.wk : 'plaster', q ? q.wk : 'plaster', ops); } }
+  for (const r of rs) {
+    if (r.type === 'cor') { for (let x = -36; x <= 36; x += 8) { lamp(x, 0, 1.6, .22); LIGHTSPOTS.push({ x, y: 2.9 + YO, z: 0, i: .9, d: 12, lv }); } continue; }
+    { const w = r.x1 - r.x0, d = r.z1 - r.z0, nx = Math.max(2, Math.round(w / 4.5)), nz = Math.max(1, Math.round(d / 4.5)), ns = w > 12 ? 2 : 1;
+      for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) { const lx = r.x0 + (i + .5) * w / nx, lz = r.z0 + (j + .5) * d / nz; if (lv === 1 && r === st && lx > hole.x0 - .6 && lz < hole.z1 + .6) continue; lamp(lx, lz); }
+      for (let i = 0; i < ns; i++) LIGHTSPOTS.push({ x: r.x0 + (i + .5) * w / ns, y: 2.9 + YO, z: r.cz, i: 1, d: 13, lv }); }
+    if (r.type === 'hall') continue;
+    amFurnish(r);
+    if (r.type !== 'lobby') { const g = r.row === 'N' ? [amDoorX(r), -AMCZ + .2, 0] : r.row === 'S' ? [amDoorX(r), AMCZ - .2, Math.PI] : [amDoorX(r), AMZ.N[0] + .2, 0]; signMesh(r.sn, g[0], 2.4, g[1], g[2], r.sn.length > 9 ? 1.6 : .9, .26, { bg: '#1f3a5f', border: '#e8c15a' }); }
+  }
+  { const hs = rs.find(q => q.type === 'hall'); amWainscot(st, amDoorX(st)); if (lv === 1) amStairs(st);
+    // benches along the wider corridor (kept away from doors)
+    const lob = rs.find(q => q.type === 'lobby');
+    for (const x of [-33, -24, -15, 16, 26, 35]) for (const sgn of [-1, 1]) { if (D.some(d => Math.abs(d.c - x) < 2.4 && Math.abs(d.f - sgn * AMCZ) < .01)) continue; if (sgn < 0 && x > hs.x0 - 1.5 && x < hs.x1 + 1.5) continue; if (sgn > 0 && lob && Math.abs(x - lob.cx) < 3.2) continue; bench(x, sgn * (AMCZ - .42), sgn < 0 ? Math.PI : 0); } }
+  const PZ = AMZ.S[1], PD = AMZ.S[1] - AMZ.S[0], PC = PZ + PD / 2, PF = PZ + PD; // balcony footprint = deputy room footprint
+  if (lv === 1) { box('concrete', (E0 + E1) / 2, H + .15, PC, E1 - E0, .3, PD); for (const x of [E0 + .5, E1 - .5]) for (const zz of [PF - .3, PZ + PD / 2]) { cyl('plaster', x, 1.7, zz, .26, .3, 3.4, 16); solid(x - .3, x + .3, zz - .3, zz + .3, 'pillar'); } }
+  else {
+    plane('pavers', (E0 + E1) / 2, .012, PC, E1 - E0, PD, 0, -Math.PI / 2); box('steel', (E0 + E1) / 2, 1.0, PF, E1 - E0, .07, .07); box('steel', E0, 1.0, PC, .07, .07, PD); box('steel', E1, 1.0, PC, .07, .07, PD);
+    for (let x = E0; x <= E1 + .01; x += 1.6) box('steel', x, .5, PF, .05, 1, .05);
+    for (let z = PZ + 1.6; z < PF; z += 1.6) { box('steel', E0, .5, z, .05, 1, .05); box('steel', E1, .5, z, .05, 1, .05); }
+    solid(E0, E1, PF - .1, PF + .1, 'rail'); solid(E0 - .1, E0 + .1, PZ, PF + .1, 'rail'); solid(E1 - .1, E1 + .1, PZ, PF + .1, 'rail');
+    signMesh('دبیرستان علامه امینی', (E0 + E1) / 2, 3.0, PZ + .14, 0, 6, .6, { bg: '#16365f', fg: '#f4e9c4', border: '#e8c15a', size: .6 });
+    amUpper(st);
+  }
+  for (let i = s0; i < Build.sit.length; i++) { Build.sit[i].y += YO; Build.sit[i].lv = lv; }
+}
+function buildAmini() {
+  const k = Math.PI / 2, fz = 49, FX = 46, BZ = -27;
+  plane('grass', 0, -.03, 0, 400, 400, 0, -k); plane('asphalt', 0, -.02, 31, 92, 36, 0, -k); plane('track', 22, -.012, 31, 28, 24, 0, -k); plane('turf', 22, -.008, 31, 24, 20, 0, -k); plane('concrete', 0, 0, -3.5, 90, 37, 0, -k); plane('pavers', -1.6, -.005, 20, 16, 17, 0, -k);
+  box('line', 22, -.004, 31, .12, .01, 20);
+  for (const [x, z, w, d] of [[-28, 24, 10, .12], [-28, 34, 10, .12], [-33, 29, .12, 10], [-23, 29, .12, 10]]) box('line', x, .015, z, w, .01, d);
+  for (let x = -FX; x <= FX; x += 2) if (Math.abs(x) >= 3) box('darksteel', x, .9, fz, .05, 1.8, .05);
+  box('darksteel', -(FX + 3) / 2, 1.6, fz, FX - 3, .06, .06); box('darksteel', (FX + 3) / 2, 1.6, fz, FX - 3, .06, .06); box('darksteel', -FX, 1, (fz + BZ) / 2, .06, 2, fz - BZ); box('darksteel', FX, 1, (fz + BZ) / 2, .06, 2, fz - BZ); box('darksteel', 0, 1, BZ, 2 * FX, 2, .06);
+  solid(-FX, -3, fz - .2, fz + .2, 'fence'); solid(3, FX, fz - .2, fz + .2, 'fence'); solid(-FX - .2, -FX + .2, BZ, fz, 'fence'); solid(FX - .2, FX + .2, BZ, fz, 'fence'); solid(-FX, FX, BZ - .2, BZ + .2, 'fence');
+  for (const [x, z, s] of [[-36, 19, 1], [-14, 40, .9], [-40, 43, 1.1], [-14, 18, .8], [38, 17, 1], [-42, -12, 1], [42, -14, 1], [-30, -24, 1], [0, -24, .9], [30, -24, 1], [-38, 34, 1]]) tree(x, z, s);
+  bench(-28, 17.5, 0); bench(-20, 17.5, 0);
+  cyl('steel', -13, 4.5, 19, .07, .09, 9, 10); box('flagG', -12.35, 8.4, 19, 1.3, .22, .02); box('flagW', -12.35, 8.18, 19, 1.3, .22, .02); box('flagR', -12.35, 7.96, 19, 1.3, .22, .02); solid(-13.3, -12.7, 18.7, 19.3, 'pole');
+  amFloor(2); amFloor(1); LV = 0; YO = 0;
+}
+/* ===== World: renderer, player, interaction, HUD ===== */
+const World = (() => {
+  const $ = id => document.getElementById(id);
+  let renderer, scene, camera, sun, pool = [], canvas, running = false, last = 0, built = false;
+  const P = { x: 0, z: 17, y: 1.65, yaw: 0, pitch: 0, vx: 0, vz: 0, sit: null, tx: 0, tz: 0, ty: 1.65, bob: 0, r: .32 };
+  const keys = {}; const touch = { mx: 0, mz: 0 }; let locked = false, freeLook = false, overlay = 'menu', hover = null, hoverT = 0, miniT = 0, lightT = 0, zoomBoard = null;
+  const ray = new THREE.Raycaster(); const v2 = new THREE.Vector2();
+  const nextFrame = () => new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
+
+  async function init(cv, onProg, mapId) {
+    canvas = cv; if (built === mapId) return; pool = [];
+    renderer = renderer || new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75)); renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    ANISO = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    scene = new THREE.Scene(); scene.fog = new THREE.Fog(0xcfdde8, 70, 260);
+    camera = new THREE.PerspectiveCamera(72, 1, .05, 500); camera.rotation.order = 'YXZ';
+    // sky dome
+    const sky = new THREE.Mesh(new THREE.SphereGeometry(400, 24, 12), new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false, fog: false,
+      vertexShader: 'varying vec3 vp; void main(){ vp = position; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);} ',
+      fragmentShader: 'varying vec3 vp; void main(){ float h = normalize(vp).y; vec3 top = vec3(0.30,0.55,0.86); vec3 hor = vec3(0.80,0.88,0.95); vec3 c = mix(hor, top, pow(clamp(h,0.0,1.0),0.55)); c = mix(c, vec3(0.55,0.62,0.55), clamp(-h*4.0,0.0,1.0)); gl_FragColor = vec4(c,1.0);} ' }));
+    scene.add(sky);
+    scene.add(new THREE.HemisphereLight(0xd6e6ff, 0x9a8c74, .78));
+    sun = new THREE.DirectionalLight(0xfff0d8, 2.3); sun.position.set(30, 50, 22); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+    const sc = sun.shadow.camera; sc.left = -34; sc.right = 34; sc.top = 34; sc.bottom = -34; sc.near = 5; sc.far = 140; sun.shadow.bias = -.0004; sun.shadow.normalBias = .04; scene.add(sun, sun.target);
+    for (let i = 0; i < 6; i++) { const l = new THREE.PointLight(0xfff1dc, 0, 14, 1.4); scene.add(l); pool.push(l); }
+
+    const step = async (t, f) => { onProg && onProg(f, t); await nextFrame(); };
+    await step('طرح‌ریزی ساختمان', .08); resetBuild(); if (mapId === 'amini') buildAmini(); else { defineRooms(); buildShell(); }
+    await step('ساخت حیاط و نما', .25); if (mapId !== 'amini') buildFacadeAndYard();
+    await step('چیدن مبلمان کلاس‌ها و اتاق‌ها', .45); if (mapId !== 'amini') buildFurnishing();
+    await step('ساخت بافت‌ها و مصالح', .7); finishBuild(scene);
+    for (const m of EXTRA_MESH) scene.add(m);
+    await step('نورپردازی', .95); Build.walls = Build.colliders.filter(c => c.tag === 'wall');
+    P.lv = 1; MS = mapId === 'amini' ? 4.4 : 6.1; MZ = mapId === 'amini' ? -4.25 : 0; miniLv = 0; buildMini(); resize(); const firstBuild = !built; built = mapId; onProg && onProg(1, 'آماده');
+    if (firstBuild) { window.addEventListener('resize', resize); bindInput(); }
+  }
+
+  function resize() { if (!renderer) return; const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+
+  /* --- slides --- */
+  function setAssignments(lists) { // lists[i] = array of {canvas,title}
+    BOARDS.forEach((bd, i) => { bd.slides = lists[i] || []; bd.texCache.forEach(t => t.dispose()); bd.texCache.clear(); setBoardSlide(bd, 0); });
+  }
+
+  /* --- input --- */
+  function bindInput() {
+    addEventListener('keydown', e => { if (!running) return; if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) { if (overlay === 'zoom') { zoomKey(e); return; } e.preventDefault(); }
+      keys[e.code] = true;
+      if (overlay === 'zoom') { zoomKey(e); return; }
+      if (e.code === 'Space' && P.sit) stand();
+      if (e.code === 'KeyE' || e.code === 'KeyF') interact(null);
+      if (e.code === 'KeyQ') stepBoard(-1); if (e.code === 'KeyR') stepBoard(1);
+      if (e.code === 'KeyM' || e.code === 'Tab') { e.preventDefault(); showMenu(true); } });
+    addEventListener('keyup', e => { keys[e.code] = false; });
+    document.addEventListener('pointerlockchange', () => { locked = document.pointerLockElement === canvas; if (!locked && running && overlay === 'play' && !freeLook) showMenu(true); });
+    document.addEventListener('mousemove', e => { if (locked) look(e.movementX, e.movementY); });
+    let drag = null;
+    canvas.addEventListener('pointerdown', e => { if (overlay !== 'play') return; if (e.pointerType === 'mouse' && locked) { interact(null); return; }
+      drag = { id: e.pointerId, x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: 0, t: performance.now() }; canvas.setPointerCapture(e.pointerId); });
+    canvas.addEventListener('pointermove', e => { if (!drag || drag.id !== e.pointerId) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY; drag.moved += Math.abs(dx) + Math.abs(dy); look(dx * 1.2, dy * 1.2); });
+    canvas.addEventListener('pointerup', e => { if (!drag || drag.id !== e.pointerId) return; const d = drag; drag = null; if (d.moved < 8 && performance.now() - d.t < 500) interact(e); });
+    // joystick
+    const joy = $('joy'), knob = joy.firstElementChild; let jid = null;
+    const jmove = e => { const r = joy.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2; let dx = (e.clientX - cx) / (r.width / 2), dy = (e.clientY - cy) / (r.height / 2); const m = Math.hypot(dx, dy); if (m > 1) { dx /= m; dy /= m; } touch.mx = dx; touch.mz = dy; knob.style.transform = `translate(${dx * 36}px,${dy * 36}px)`; };
+    joy.addEventListener('pointerdown', e => { jid = e.pointerId; joy.setPointerCapture(jid); jmove(e); if (P.sit) stand(); e.stopPropagation(); });
+    joy.addEventListener('pointermove', e => { if (e.pointerId === jid) jmove(e); });
+    const jend = e => { if (e.pointerId === jid) { jid = null; touch.mx = touch.mz = 0; knob.style.transform = ''; } }; joy.addEventListener('pointerup', jend); joy.addEventListener('pointercancel', jend);
+    if (matchMedia('(pointer:coarse)').matches) $('game').classList.add('touch');
+    $('b-menu').onclick = () => showMenu(true); $('b-resume').onclick = resume;
+    $('z-close').onclick = closeZoom; $('z-prev').onclick = () => zoomStep(-1); $('z-next').onclick = () => zoomStep(1);
+  }
+  function look(dx, dy) { P.yaw -= dx * .0022; P.pitch = Math.max(-1.35, Math.min(1.35, P.pitch - dy * .0022)); }
+
+  function showMenu(on) {
+    overlay = on ? 'menu' : 'play'; $('menu').hidden = !on; if (on && document.pointerLockElement) document.exitPointerLock();
+    if (on) $('menu-sub').textContent = freeLook ? 'برای نگاه کردن، روی صحنه بکشید.' : 'برای شروع روی «ادامه» بزنید و با ماوس نگاه کنید.';
+  }
+  function resume() {
+    showMenu(false);
+    if (!matchMedia('(pointer:coarse)').matches) { try { const r = canvas.requestPointerLock(); if (r && r.catch) r.catch(() => { freeLook = true; }); } catch (e) { freeLook = true; } setTimeout(() => { if (!document.pointerLockElement) freeLook = true; }, 400); } else freeLook = true;
+  }
+
+  /* --- movement & collision --- */
+  function resolve() {
+    const r = P.r; for (const c of Build.colliders) { if ((c.lv && c.lv !== P.lv) || (c.hy && P.base >= c.hy - .1)) continue;
+      const nx = Math.max(c.minx, Math.min(P.x, c.maxx)), nz = Math.max(c.minz, Math.min(P.z, c.maxz)); let dx = P.x - nx, dz = P.z - nz, d2 = dx * dx + dz * dz;
+      if (d2 < r * r) { if (d2 > 1e-8) { const d = Math.sqrt(d2), k = (r - d) / d; P.x += dx * k; P.z += dz * k; }
+        else { const l = P.x - c.minx, rr = c.maxx - P.x, t = P.z - c.minz, b = c.maxz - P.z, m = Math.min(l, rr, t, b); if (m === l) P.x = c.minx - r; else if (m === rr) P.x = c.maxx + r; else if (m === t) P.z = c.minz - r; else P.z = c.maxz + r; } } }
+  }
+  function gy(x, z) { const b0 = P.y - 1.65; for (const r of Build.ramps) { if (x < r.minx || x > r.maxx || z < r.minz || z > r.maxz) continue; const t = Math.max(0, Math.min(1, ((r.ax === 'z' ? z : x) - r.a) / (r.b - r.a))), y = r.y0 + (r.y1 - r.y0) * t; if (Math.abs(b0 - y) < 1) { P.lv = y > 1.85 ? 2 : 1; return y; } } return P.lv === 2 ? 3.7 : 0; }
+  function sitOn(s) { P.sit = s; P.tx = s.x; P.tz = s.z; P.ty = s.y + .72; P.vx = P.vz = 0; }
+  function stand() { const s = P.sit; if (!s) return; P.sit = null; P.x = P.tx + Math.sin(s.yaw) * .85; P.z = P.tz + Math.cos(s.yaw) * .85; P.y = 1.2; resolve(); }
+  function update(dt) {
+    let f = 0, s = 0; if (keys.KeyW || keys.ArrowUp) f += 1; if (keys.KeyS || keys.ArrowDown) f -= 1; if (keys.KeyD || keys.ArrowRight) s += 1; if (keys.KeyA || keys.ArrowLeft) s -= 1;
+    f -= touch.mz; s += touch.mx; const mag = Math.hypot(f, s);
+    if (P.sit) { if (mag > .3) stand();
+      const k = 1 - Math.exp(-9 * dt); P.x += (P.tx - P.x) * k; P.z += (P.tz - P.z) * k; P.y += (P.ty - P.y) * k; }
+    else { if (mag > 1) { f /= mag; s /= mag; } const sp = (keys.ShiftLeft || keys.ShiftRight) ? 6.2 : 3.3; const sy = Math.sin(P.yaw), cy = Math.cos(P.yaw);
+      const wx = (-sy * f + cy * s) * sp, wz = (-cy * f - sy * s) * sp; const a = 1 - Math.exp(-10 * dt); P.vx += (wx - P.vx) * a; P.vz += (wz - P.vz) * a;
+      const steps = Math.max(1, Math.ceil(Math.hypot(P.vx, P.vz) * dt / .15)); for (let i = 0; i < steps; i++) { P.x += P.vx * dt / steps; P.z += P.vz * dt / steps; resolve(); }
+      P.bob += Math.hypot(P.vx, P.vz) * dt * 2.1; const ty = (P.base = gy(P.x, P.z)) + 1.65 + Math.sin(P.bob) * .018 * Math.min(1, Math.hypot(P.vx, P.vz) / 3); P.y += (ty - P.y) * (1 - Math.exp(-14 * dt)); }
+    camera.position.set(P.x, P.y, P.z); camera.rotation.set(P.pitch, P.yaw, 0);
+    // smoothly face the chair direction when sitting down
+    if (P.sit) { let d = P.sit.yaw - P.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); if (Math.abs(P.sitAlign || 0) < 1) { P.yaw += d * (1 - Math.exp(-5 * dt)); P.sitAlign = (P.sitAlign || 0) + dt; } } else P.sitAlign = 0;
+  }
+
+  /* --- interaction --- */
+  function rayBlocked(o, tx, tz) { // 2D segment vs wall boxes
+    const dx = tx - o.x, dz = tz - o.z; for (const c of Build.walls) { if (c.lv && c.lv !== P.lv) continue; let t0 = 0, t1 = 1;
+      for (const [p, d, mn, mx] of [[o.x, dx, c.minx, c.maxx], [o.z, dz, c.minz, c.maxz]]) { if (Math.abs(d) < 1e-9) { if (p < mn || p > mx) { t0 = 2; break; } } else { let a = (mn - p) / d, b = (mx - p) / d; if (a > b) [a, b] = [b, a]; t0 = Math.max(t0, a); t1 = Math.min(t1, b); if (t0 > t1) break; } }
+      if (t0 <= t1 && t0 < .98) return true; } return false; }
+  function pick(e) {
+    if (e) { const r = canvas.getBoundingClientRect(); v2.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); } else v2.set(0, 0);
+    ray.setFromCamera(v2, camera); const o = ray.ray.origin, d = ray.ray.direction; let best = null, bt = 1e9;
+    const objs = []; for (const b of BOARDS) { b.mesh.userData.b = b; b.ctrl.userData.b = b; objs.push(b.mesh, b.ctrl); }
+    const hit = ray.intersectObjects(objs, false)[0]; if (hit && hit.distance < 9) { const bd = hit.object.userData.b, isCtrl = hit.object === bd.ctrl; let act = 'zoom'; if (isCtrl) act = hit.uv.x < .27 ? 'prev' : hit.uv.x > .73 ? 'next' : 'zoom'; best = { kind: 'board', bd, act }; bt = hit.distance; }
+    for (const s of Build.sit) { if (P.sit === s || (s.lv && s.lv !== P.lv)) continue; const px = s.x - o.x, py = s.y + .3 - o.y, pz = s.z - o.z, t = px * d.x + py * d.y + pz * d.z; if (t < .2 || t > 3.6 || t > bt) continue;
+      const qx = o.x + d.x * t - s.x, qy = o.y + d.y * t - (s.y + .3), qz = o.z + d.z * t - s.z; if (qx * qx + qy * qy + qz * qz < .2 * .2 * 1.9 && !rayBlocked(o, s.x, s.z)) { best = { kind: 'sit', s }; bt = t; } }
+    return best;
+  }
+  function interact(e) {
+    const h = pick(e); if (!h) { if (P.sit && e) stand(); return; }
+    if (h.kind === 'sit') sitOn(h.s);
+    else if (h.act === 'prev') setBoardSlide(h.bd, h.bd.idx - 1); else if (h.act === 'next') setBoardSlide(h.bd, h.bd.idx + 1); else openZoom(h.bd);
+  }
+  function roomAt(x, z) { const ok = r => (!r.lv || r.lv === P.lv) && x >= r.x0 && x <= r.x1 && z >= r.z0 && z <= r.z1; return ROOMS.find(r => !['corridor', 'cor', 'hall'].includes(r.type) && ok(r)) || ROOMS.find(ok) || null; }
+  function currentBoard() { const r = roomAt(P.x, P.z); const bd = r && BOARDS.find(b => b.room === r); if (bd) return bd; let best = null, bd2 = 1e9; for (const b of BOARDS) { const d = Math.hypot(b.x - P.x, b.z - P.z); if (d < bd2 && d < 9) { bd2 = d; best = b; } } return best; }
+  function stepBoard(n) { const b = currentBoard(); if (b && b.slides.length) setBoardSlide(b, b.idx + n); }
+
+  /* --- zoom (presentation view) --- */
+  function openZoom(bd) { if (!bd.slides.length) return; zoomBoard = bd; overlay = 'zoom'; if (document.pointerLockElement) document.exitPointerLock(); $('zoom').hidden = false; drawZoom(); }
+  function drawZoom() { const bd = zoomBoard; if (!bd) return; const sl = bd.slides[bd.idx]; const c = $('zc'), s = sl.canvas; c.width = s.width; c.height = s.height; c.getContext('2d').drawImage(s, 0, 0); c.style.aspectRatio = s.width + '/' + s.height; $('z-n').textContent = FA(bd.idx + 1) + ' از ' + FA(bd.slides.length) + ' — ' + bd.room.name; }
+  function zoomStep(n) { if (zoomBoard) { setBoardSlide(zoomBoard, zoomBoard.idx + n); drawZoom(); } }
+  function closeZoom() { $('zoom').hidden = true; zoomBoard = null; overlay = 'play'; showMenu(true); }
+  function zoomKey(e) { if (e.code === 'Escape') closeZoom(); else if (['ArrowLeft', 'KeyA', 'KeyQ', 'PageUp'].includes(e.code)) zoomStep(-1); else if (['ArrowRight', 'KeyD', 'KeyR', 'Space', 'PageDown', 'KeyE'].includes(e.code)) zoomStep(1); e.preventDefault(); }
+  window.onBoardChange = bd => { if (zoomBoard === bd) drawZoom(); };
+
+  /* --- minimap --- */
+  let miniBase = null, MS = 6.1, MZ = 0, miniLv = 0;
+  function m2c(x, z) { return [210 + x * MS, 76 + (z - MZ) * MS]; }
+  function buildMini() { const c = cnv(420, 152), g = c.getContext('2d'); g.fillStyle = '#243040'; g.fillRect(0, 0, 420, 152);
+    for (const r of ROOMS.filter(q => !q.lv || q.lv === P.lv)) { const [a, b] = m2c(r.x0, r.z0), [a2, b2] = m2c(r.x1, r.z1); g.fillStyle = r.type === 'class' ? '#4d7aa8' : (r.type === 'corridor' || r.type === 'cor' || r.type === 'hall') ? '#6c7686' : r.type === 'lobby' ? '#c9a24f' : '#7b5f93'; g.fillRect(a + 1, b + 1, a2 - a - 2, b2 - b - 2); }
+    g.fillStyle = '#e8edf3'; g.font = '11px Vazirmatn, Tahoma, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; for (const r of ROOMS.filter(q => !q.lv || q.lv === P.lv)) { if (['corridor', 'cor', 'hall'].includes(r.type)) continue; const [x, y] = m2c(r.cx, r.cz); g.fillText(r.lbl || (r.type === 'class' ? FA(+r.id.slice(5) + 1) : r.name.split(' ').pop()), x, y); }
+    miniBase = c; }
+  function drawMini() { if (miniLv !== P.lv) { miniLv = P.lv; buildMini(); } const g = $('mini').getContext('2d'); g.drawImage(miniBase, 0, 0); let [x, y] = m2c(P.x, P.z); x = Math.max(8, Math.min(412, x)); y = Math.max(8, Math.min(144, y));
+    g.save(); g.translate(x, y); g.rotate(-P.yaw); g.fillStyle = '#ffd24a'; g.strokeStyle = '#000'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(0, -8); g.lineTo(6, 6); g.lineTo(0, 3); g.lineTo(-6, 6); g.closePath(); g.fill(); g.stroke(); g.restore(); }
+
+  /* --- teleport list --- */
+  function teleport(id) { P.sit = null; P.vx = P.vz = 0; P.y = 1.65; const r = RM(id);
+    if (MAPID === 'amini') { if (id === 'yard') { P.lv = 1; P.x = 0; P.z = 21; } else { P.lv = r.lv; P.x = r.type === 'stairs' ? r.x0 + 1.4 : r.cx; P.z = r.type === 'stairs' ? r.z1 - .8 : r.cz; } P.yaw = 0; P.pitch = 0; P.base = P.lv === 2 ? 3.7 : 0; P.y = P.base + 1.65; resolve(); return; }
+    if (id === 'yard') { P.x = 0; P.z = 20; P.yaw = 0; }
+    else if (r.type === 'class') { P.x = r.x0 + 1.7; P.z = -3.4; P.yaw = 0.0; }
+    else if (r.type === 'lobby') { P.x = 0; P.z = 7.5; P.yaw = 0; }
+    else { P.x = r.cx; P.z = r.type === 'corridor' ? 0 : r.cz; P.yaw = r.type === 'corridor' ? Math.PI / 2 : Math.PI; if (r.type !== 'corridor') { P.z = 4.6; P.yaw = 0; } }
+    P.pitch = 0; resolve(); }
+  function fillTele() { const ul = $('tele'); ul.innerHTML = ''; const add = (id, name) => { const li = document.createElement('li'), b = document.createElement('button'); b.type = 'button'; b.textContent = name; b.onclick = () => { teleport(id); resume(); }; li.appendChild(b); ul.appendChild(li); };
+    add('yard', 'حیاط و ورودی'); for (const r of ROOMS) if (!['corridor', 'cor', 'hall'].includes(r.type)) add(r.id, r.name); if (MAPID !== 'amini') add('corridor', 'راهرو'); }
+
+  /* --- main loop --- */
+  function frame(t) {
+    if (!running) return; const dt = Math.min(.05, (t - last) / 1000 || .016); last = t;
+    if (overlay === 'play' || P.sit || overlay === 'menu') update(overlay === 'menu' ? 0 : dt);
+    sun.target.position.set(Math.round(P.x / 4) * 4, 0, Math.round(P.z / 4) * 4); sun.position.set(sun.target.position.x + 30, 50, sun.target.position.z + 22);
+    lightT -= dt; if (lightT <= 0) { lightT = .25; const L2 = LIGHTSPOTS.filter(l => !l.lv || l.lv === P.lv).map(l => [(l.x - P.x) ** 2 + (l.z - P.z) ** 2, l]).sort((a, b) => a[0] - b[0]); pool.forEach((pl, i) => { const e = L2[i]; if (e) { pl.position.set(e[1].x, e[1].y, e[1].z); pl.intensity = e[1].i * 1.15; pl.distance = e[1].d; } else pl.intensity = 0; }); }
+    hoverT -= dt; if (hoverT <= 0 && overlay === 'play') { hoverT = .12; hover = locked ? pick(null) : null; const cr = $('cross'), pr = $('prompt');
+      cr.classList.toggle('act', !!hover); if (hover) { pr.hidden = false; pr.textContent = hover.kind === 'sit' ? 'کلیک: نشستن — ' + hover.s.name : hover.act === 'prev' ? 'کلیک: اسلاید قبلی' : hover.act === 'next' ? 'کلیک: اسلاید بعدی' : 'کلیک: نمایش بزرگ اسلاید'; }
+      else if (P.sit) { pr.hidden = false; pr.textContent = 'برای بلند شدن Space یا حرکت بزنید'; } else { const b = currentBoard(); const inClass = b && roomAt(P.x, P.z) === b.room; if (inClass && b.slides.length) { pr.hidden = false; pr.textContent = 'Q / R: تغییر اسلاید همین کلاس'; } else pr.hidden = true; } }
+    miniT -= dt; if (miniT <= 0) { miniT = .1; drawMini(); const r = roomAt(P.x, P.z); $('where').textContent = r ? r.name : 'حیاط مدرسه'; }
+    renderer.render(scene, camera); requestAnimationFrame(frame);
+  }
+  function start(assign) { running = true; overlay = 'menu'; $('game').hidden = false; resize(); $('tele').innerHTML = ''; fillTele(); P.sit = null; P.x = 0; P.z = MAPID === 'amini' ? 21 : 20; P.lv = 1; P.base = 0; P.yaw = 0; P.pitch = 0; P.y = 1.65;
+    $('menu-title').textContent = 'به مدرسه خوش آمدید'; showMenu(true); last = performance.now(); requestAnimationFrame(frame); }
+  function stop() { running = false; if (document.pointerLockElement) document.exitPointerLock(); $('game').hidden = true; }
+  return { init, start, stop, setAssignments, resume, showMenu, P, teleport, sitOn, stand };
+})();
+/* ===== App: screens, deck handling, assignment ===== */
+(() => {
+  const $ = id => document.getElementById(id);
+  const S = { slides: [], mode: 'auto', manual: [], file: null };
+  let worldReady = false;
+
+  function setStep(n) { document.querySelectorAll('#steps li').forEach(li => { const s = +li.dataset.s; li.classList.toggle('on', s === n); li.classList.toggle('done', s < n); }); }
+  function show(id) { for (const s of ['s-map', 's-deck']) $(s).hidden = s !== id; setStep(id === 's-map' ? 1 : 2); scrollTo(0, 0); }
+
+  /* map card preview (top-down plan) */
+  function drawPlan() {
+    defineRooms(); const c = $('plan'), g = c.getContext('2d'), W = c.width, H = c.height;
+    g.fillStyle = '#5d8f45'; g.fillRect(0, 0, W, H); g.fillStyle = '#4b7a37'; for (let i = 0; i < 90; i++) g.fillRect((i * 97) % W, (i * 53) % H, 14, 3);
+    const k = 6.5, ox = W / 2, oz = 8; const X = x => ox + x * k, Z = z => oz + (z + 12) * k * .95;
+    g.fillStyle = '#51565c'; g.fillRect(X(-28), Z(10), 56 * k, 30 * k * .95); g.fillStyle = '#2f6b8f'; g.fillRect(X(6), Z(18), 22 * k, 16 * k * .95);
+    g.strokeStyle = 'rgba(255,255,255,.7)'; g.lineWidth = 2; g.strokeRect(X(6), Z(18), 22 * k, 16 * k * .95); g.fillStyle = '#c9b8a0'; g.fillRect(X(-3.2), Z(10), 6.4 * k, 38 * k * .95);
+    for (const r of ROOMS) { g.fillStyle = r.type === 'class' ? '#9fc1e6' : r.type === 'corridor' ? '#d7d0bf' : r.type === 'lobby' ? '#e3c673' : '#b9a4cf'; g.fillRect(X(r.x0), Z(r.z0), (r.x1 - r.x0) * k, (r.z1 - r.z0) * k * .95); g.strokeStyle = '#34404f'; g.lineWidth = 2; g.strokeRect(X(r.x0), Z(r.z0), (r.x1 - r.x0) * k, (r.z1 - r.z0) * k * .95); }
+    g.fillStyle = '#16212e'; g.font = '700 15px Vazirmatn, Tahoma, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    for (const r of ROOMS) { if (r.type === 'corridor') continue; g.fillText(r.type === 'class' ? FA(+r.id.slice(5) + 1) : r.name.replace('اتاق ', '').replace(' مدرسه', ''), X(r.cx), Z(r.cz)); }
+    g.fillStyle = '#e8edf3'; g.fillText('حیاط', X(-14), Z(24));
+    for (const [x, z] of [[-20, 20], [-24, 28], [-14, 30], [-8, 36], [26, 38], [30, -16], [-26, -16], [-6, -17]]) { g.fillStyle = '#2d5a24'; g.beginPath(); g.arc(X(x), Z(z), 11, 0, 7); g.fill(); }
+  }
+
+  function selectMap(id) { MAPID = id; CLASS_N = id === 'amini' ? 11 : 6; CLASS_NAMES = id === 'amini' ? AM_NAMES : SCH_NAMES; S.manual = autoAssign(S.slides.length).slice(); renderSlides(); }
+  function drawPlan2() {
+    const c = $('plan2'), g = c.getContext('2d'), k = 4.2, X = x => 320 + x * k, Z = z => 8 + (z + 21) * k;
+    g.fillStyle = '#5d8f45'; g.fillRect(0, 0, 640, 360); g.fillStyle = '#51565c'; g.fillRect(X(-46), Z(13), 92 * k, 36 * k); g.fillStyle = '#a8452f'; g.fillRect(X(8), Z(19), 28 * k, 24 * k); g.fillStyle = '#3f8f46'; g.fillRect(X(10), Z(21), 24 * k, 20 * k);
+    g.font = '700 14px Vazirmatn, Tahoma, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    for (const r of amRooms(1)) { g.fillStyle = r.type === 'class' ? '#9fc1e6' : r.type === 'cor' || r.type === 'hall' ? '#d7d0bf' : r.type === 'lobby' ? '#e3c673' : '#b9a4cf'; g.fillRect(X(r.x0), Z(r.z0), (r.x1 - r.x0) * k, (r.z1 - r.z0) * k); g.strokeStyle = '#34404f'; g.lineWidth = 1.5; g.strokeRect(X(r.x0), Z(r.z0), (r.x1 - r.x0) * k, (r.z1 - r.z0) * k); g.fillStyle = '#16212e'; if (r.lbl) g.fillText(r.lbl, X(r.cx), Z(r.cz)); }
+    g.fillStyle = '#e8edf3'; g.fillText('حیاط', X(-26), Z(40)); g.fillText('زمین ورزش', X(22), Z(31));
+  }
+  /* demo deck */
+  function demoSlides() {
+    const out = [], W = 1600, H = 900; const font = (w, px) => `${w} ${px}px Vazirmatn, Tahoma, sans-serif`;
+    const mk = (bg, draw, title) => { const c = cnv(W, H), g = c.getContext('2d'); g.fillStyle = bg; g.fillRect(0, 0, W, H); g.direction = 'rtl'; draw(g); out.push({ canvas: c, title }); };
+    const T = (g, t, x, y, px, col = '#1c2a3d', w = 700, al = 'right') => { g.fillStyle = col; g.font = font(w, px); g.textAlign = al; g.textBaseline = 'alphabetic'; g.fillText(t, x, y); };
+    const planets = [['عطارد', 4879, '#a89f94'], ['زهره', 12104, '#e6c178'], ['زمین', 12756, '#3d7fd6'], ['مریخ', 6792, '#c4583a'], ['مشتری', 142984, '#d4a574'], ['زحل', 120536, '#e0cf9a'], ['اورانوس', 51118, '#8fd1d6'], ['نپتون', 49528, '#4668c8']];
+    mk('#0d1b34', g => { for (let i = 0; i < 140; i++) { g.fillStyle = `rgba(255,255,255,${.2 + (i % 7) / 10})`; g.fillRect((i * 163) % W, (i * 71) % H, 3, 3); } const gr = g.createRadialGradient(1300, 250, 20, 1300, 250, 230); gr.addColorStop(0, '#fff3b0'); gr.addColorStop(.5, '#f7b733'); gr.addColorStop(1, 'rgba(247,183,51,0)'); g.fillStyle = gr; g.beginPath(); g.arc(1300, 250, 230, 0, 7); g.fill();
+      T(g, 'سفر به منظومهٔ شمسی', 1500, 520, 110, '#fff'); T(g, 'اسلایدهای نمونه برای تور سه‌بعدی مدرسه', 1500, 620, 48, '#b9c7e0', 400); }, 'عنوان');
+    mk('#f7f5ee', g => { T(g, 'خورشید، ستارهٔ ما', 1500, 160, 82); const ls = ['نزدیک‌ترین ستاره به زمین', 'حدود ۱٫۳ میلیون برابر زمین حجم دارد', 'دمای سطح آن نزدیک ۵۵۰۰ درجهٔ سانتی‌گراد است', 'نور آن در حدود ۸ دقیقه به زمین می‌رسد']; ls.forEach((t, i) => { g.fillStyle = '#f2a900'; g.beginPath(); g.arc(1470, 300 + i * 120 - 16, 11, 0, 7); g.fill(); T(g, t, 1430, 300 + i * 120, 54, '#2a3750', 400); }); }, 'خورشید');
+    mk('#eef4f1', g => { T(g, 'سیارات درونی', 1500, 160, 82); planets.slice(0, 4).forEach(([n, d, c], i) => { const x = 1300 - i * 360, r = 40 + d / 160; g.fillStyle = c; g.beginPath(); g.arc(x, 470, Math.min(r, 140), 0, 7); g.fill(); T(g, n, x, 700, 54, '#2a3750', 700, 'center'); T(g, d.toLocaleString('fa-IR') + ' کیلومتر', x, 770, 34, '#58677d', 400, 'center'); }); }, 'سیارات درونی');
+    mk('#f1eff7', g => { T(g, 'سیارات بیرونی', 1500, 160, 82); planets.slice(4).forEach(([n, d, c], i) => { const x = 1330 - i * 360, r = Math.min(30 + d / 700, 150); g.fillStyle = c; g.beginPath(); g.arc(x, 470, r, 0, 7); g.fill(); if (n === 'زحل') { g.strokeStyle = '#b8a36a'; g.lineWidth = 10; g.beginPath(); g.ellipse(x, 470, r * 1.6, r * .35, -.3, 0, 7); g.stroke(); } T(g, n, x, 700, 54, '#2a3750', 700, 'center'); T(g, d.toLocaleString('fa-IR') + ' کیلومتر', x, 770, 34, '#58677d', 400, 'center'); }); }, 'سیارات بیرونی');
+    mk('#fbfaf6', g => { T(g, 'قطر سیارات (هزار کیلومتر)', 1500, 150, 70); const mx = 142984, bx = 150, by = 760, bw = 140; planets.forEach(([n, d, c], i) => { const h = d / mx * 520, x = 1420 - i * 175; g.fillStyle = c; g.fillRect(x - 60, by - h, 120, h); T(g, n, x, by + 55, 36, '#2a3750', 700, 'center'); T(g, (Math.round(d / 100) / 10).toLocaleString('fa-IR'), x, by - h - 14, 32, '#2a3750', 500, 'center'); }); g.fillStyle = '#2a3750'; g.fillRect(100, by, 1400, 4); }, 'نمودار');
+    mk('#10253d', g => { T(g, 'ماه‌ها و قمرها', 1500, 160, 82, '#fff'); const ls = ['زمین یک قمر دارد: ماه', 'مریخ دو قمر کوچک دارد', 'مشتری و زحل ده‌ها قمر شناخته‌شده دارند', 'بزرگ‌ترین قمر منظومه، گانیمد است']; ls.forEach((t, i) => { T(g, '• ' + t, 1480, 330 + i * 120, 54, '#dfe8f5', 400); }); }, 'قمرها');
+    mk('#fff6e0', g => { T(g, 'پرسش', 1500, 170, 82, '#9a4b00'); T(g, 'کدام سیاره بزرگ‌ترین قطر را دارد؟', 1500, 380, 64); ['الف) زمین', 'ب) مشتری', 'ج) زحل', 'د) نپتون'].forEach((t, i) => { g.fillStyle = i === 1 ? '#ffd982' : '#ffe9b0'; g.fillRect(900 - (i % 2) * 800 + 0, 500 + Math.floor(i / 2) * 150, 650, 110); T(g, t, 1520 - (i % 2) * 800, 575 + Math.floor(i / 2) * 150, 50, '#3a2a10', 500); }); }, 'پرسش');
+    mk('#1c2a3d', g => { T(g, 'پایان — ممنون از توجه شما', 800, 470, 90, '#fff', 700, 'center'); T(g, 'برای تغییر اسلاید از دکمه‌های روی تخته استفاده کنید', 800, 580, 42, '#aebbd0', 400, 'center'); }, 'پایان');
+    return out;
+  }
+
+  /* assignment */
+  function autoAssign(n) { const k = CLASS_N, base = Math.floor(n / k), extra = n % k, res = []; let c = 0, used = 0; if (n < k) { for (let i = 0; i < n; i++) res.push(i); return res; }
+    for (let i = 0; i < k; i++) { const cnt = base + (i < extra ? 1 : 0); for (let j = 0; j < cnt; j++) res.push(i); } return res; }
+  function currentAssign() { return S.mode === 'auto' ? autoAssign(S.slides.length) : S.manual; }
+  function lists() { const a = currentAssign(), L = Array.from({ length: CLASS_N }, () => []); S.slides.forEach((s, i) => { if (a[i] >= 0) L[a[i]].push(s); }); return L; }
+
+  function renderSlides() {
+    const box = $('slides'); box.innerHTML = ''; const a = currentAssign();
+    if (!S.slides.length) { box.innerHTML = '<div class="empty">بعد از وارد کردن فایل، اسلایدها اینجا دیده می‌شوند.</div>'; $('count').textContent = ''; renderSum(); return; }
+    $('count').textContent = '(' + FA(S.slides.length) + ' اسلاید)';
+    S.slides.forEach((s, i) => {
+      const it = document.createElement('div'); it.className = 'slide-item'; const th = document.createElement('canvas'); th.width = 320; th.height = 180; th.getContext('2d').drawImage(s.canvas, 0, 0, 320, 180);
+      const row = document.createElement('div'); row.className = 'row'; const lab = document.createElement('span'); lab.className = 'num'; lab.textContent = FA(i + 1) + '. ' + (s.title || '').slice(0, 22);
+      const sel = document.createElement('select'); sel.id = 'sel' + i; sel.setAttribute('aria-label', 'کلاس اسلاید ' + FA(i + 1)); sel.disabled = S.mode === 'auto';
+      const none = new Option('بدون نمایش', -1); sel.add(none); CLASS_NAMES.forEach((n, k) => sel.add(new Option(n, k))); sel.value = String(a[i] ?? -1);
+      sel.onchange = () => { S.manual[i] = +sel.value; renderSum(); };
+      const top = document.createElement('div'); top.className = 'row'; top.appendChild(lab); it.append(th, top, sel); box.appendChild(it);
+    }); renderSum();
+  }
+  function renderSum() { const L = lists(), el = $('sum'); el.innerHTML = ''; L.forEach((l, i) => { const d = document.createElement('div'); d.innerHTML = '<span>' + CLASS_NAMES[i] + '</span><b class="num">' + FA(l.length) + '</b>'; el.appendChild(d); }); $('go').disabled = !S.slides.length; }
+  function setMode(m) { if (m === 'manual' && S.mode === 'auto') S.manual = autoAssign(S.slides.length).slice(); S.mode = m;
+    $('m-auto').setAttribute('aria-pressed', m === 'auto'); $('m-manual').setAttribute('aria-pressed', m === 'manual');
+    $('mode-hint').textContent = m === 'auto' ? 'اسلایدها به‌صورت پشت‌سرهم و مساوی بین کلاس‌ها تقسیم می‌شوند.' : 'برای هر اسلاید کلاس مورد نظر را از فهرست انتخاب کنید. چند اسلاید می‌توانند در یک کلاس باشند.'; renderSlides(); }
+
+  async function useSlides(slides, label) { S.slides = slides; S.manual = autoAssign(slides.length).slice(); $('info').className = 'file-info ok'; $('info').textContent = label + ' — ' + FA(slides.length) + ' اسلاید آماده است.'; renderSlides(); }
+  async function loadFile(f) {
+    if (!f) return; if (!/\.pptx$/i.test(f.name)) { $('info').className = 'file-info err'; $('info').textContent = 'فقط فایل با پسوند pptx پذیرفته می‌شود. فایل ppt قدیمی را در پاورپوینت با «Save As» به pptx تبدیل کنید.'; return; }
+    $('info').className = 'file-info'; $('info').textContent = 'در حال خواندن «' + f.name + '»…';
+    try { await document.fonts.load('700 24px Vazirmatn'); await document.fonts.load('400 24px Vazirmatn'); const sl = await PPTX.load(f, p => { $('info').textContent = 'در حال خواندن اسلایدها… ' + FA(Math.round(p * 100)) + '٪'; }); await useSlides(sl, f.name); }
+    catch (e) { console.error(e); $('info').className = 'file-info err'; $('info').textContent = (e && e.message) || 'خواندن فایل ممکن نشد. فایل دیگری را امتحان کنید.'; }
+  }
+
+  async function enter() {
+    const ld = $('loading'); ld.hidden = false; const bar = $('lbar'), tx = $('ltxt');
+    try { await document.fonts.load('700 24px Vazirmatn');
+      if (worldReady !== MAPID) { await World.init($('gl'), (f, t) => { bar.style.width = Math.round(f * 100) + '%'; tx.textContent = t; }, MAPID); worldReady = MAPID; }
+      World.setAssignments(lists()); setStep(3); ld.hidden = true; $('app').hidden = true; World.start();
+    } catch (e) { console.error(e); tx.textContent = 'ساخت محیط سه‌بعدی ممکن نشد: ' + (e.message || e) + ' — مرورگر باید از WebGL پشتیبانی کند.'; setTimeout(() => { ld.hidden = true; }, 5000); }
+  }
+
+  $('pick-school').onclick = () => { selectMap('school'); show('s-deck'); };
+  $('pick-amini').onclick = () => { selectMap('amini'); show('s-deck'); };
+  $('back').onclick = () => show('s-map');
+  $('m-auto').onclick = () => setMode('auto'); $('m-manual').onclick = () => setMode('manual');
+  $('file').onchange = e => loadFile(e.target.files[0]);
+  const dz = $('drop'); ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('over'); })); ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('over'); }));
+  dz.addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
+  $('demo').onclick = async () => { await document.fonts.load('700 24px Vazirmatn'); await document.fonts.load('400 24px Vazirmatn'); await useSlides(demoSlides(), 'اسلایدهای نمونه'); };
+  $('go').onclick = enter;
+  $('b-exit').onclick = () => { World.stop(); $('app').hidden = false; show('s-deck'); };
+  window.__W = World; window.__app = { S, demoSlides, useSlides, lists };
+  renderSum(); document.fonts.ready.then(() => { drawPlan(); drawPlan2(); }); drawPlan(); drawPlan2();
+})();
+</script>
+
+</body></html>
